@@ -175,4 +175,16 @@ public class Java2DGameWindow extends Canvas implements GameWindow {
 			strategy.show();
 		}
 	}
+
+	@Override
+	public boolean isLMousePressed(int mouseCode) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isRMousePressed(int mouseCode) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

@@ -238,4 +238,16 @@ public class JoglGameWindow implements GLEventListener,GameWindow {
 		// we're not going to do anything here, we could react to the display 
 		// mode changing but for the tutorial there's not much point.
 	}
+
+	@Override
+	public boolean isLMousePressed(int mouseCode) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isRMousePressed(int mouseCode) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

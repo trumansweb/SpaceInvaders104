@@ -3,8 +3,10 @@ package org.newdawn.spaceinvaders.lwjgl;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
@@ -197,9 +199,35 @@ public class LWJGLGameWindow implements GameWindow {
 		case KeyEvent.VK_RIGHT:
 			keyCode = Keyboard.KEY_RIGHT;
 			break;
+		case KeyEvent.VK_SHIFT:
+			keyCode = Keyboard.KEY_LSHIFT;
+			break;
 		}    
 		
 		return org.lwjgl.input.Keyboard.isKeyDown(keyCode);
+	}	
+	/**
+	 * Check if a particular key is current pressed.
+	 *
+	 * @param keyCode The code associated with the key to check 
+	 * @return True if the specified key is pressed
+	 */
+	public boolean isLMousePressed(int mouseCode) {
+		switch(mouseCode) {
+			case MouseEvent.BUTTON1:
+				mouseCode = 0;
+				break;
+		}
+		return org.lwjgl.input.Mouse.isButtonDown(mouseCode);
+	}
+  
+	public boolean isRMousePressed(int mouseCode) {
+		switch(mouseCode) {
+			case MouseEvent.BUTTON2:
+				mouseCode = 1;
+				break;
+		}
+		return org.lwjgl.input.Mouse.isButtonDown(mouseCode);
 	}
   
 	/**
@@ -227,5 +255,5 @@ public class LWJGLGameWindow implements GameWindow {
 				callback.windowClosed();
 			}
 		}
-	}  
+	}
 }

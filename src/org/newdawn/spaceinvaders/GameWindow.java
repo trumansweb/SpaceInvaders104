@@ -45,4 +45,6 @@ public interface GameWindow {
 	 * @return True if the particular key is pressed
 	 */
 	public boolean isKeyPressed(int keyCode);
+	public boolean isLMousePressed(int mouseCode);
+	public boolean isRMousePressed(int mouseCode);
 }

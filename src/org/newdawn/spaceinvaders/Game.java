@@ -1,9 +1,12 @@
 package org.newdawn.spaceinvaders;
 
 import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
@@ -34,8 +37,8 @@ public class Game extends Canvas implements GameWindowCallback {
 	private double moveSpeed = 300;
 	/** The time at which last fired a shot */
 	private long lastFire = 0;
-	/** The interval between our players shot (ms) */
-	private long firingInterval = 500;
+	/** The interval between our player is allowed to shot (ms) */
+	private long firingInterval = 100;
 	/** The number of aliens left on the screen */
 	private int alienCount;
 	
@@ -72,6 +75,8 @@ public class Game extends Canvas implements GameWindowCallback {
 	GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 	private int width = gd.getDisplayMode().getWidth();
 	private int height = gd.getDisplayMode().getHeight();
+	private int level = 1;
+	private boolean fire2HasBeenReleased;
 	
 	/**
 	 * Construct our game and set it running.
@@ -125,14 +130,11 @@ public class Game extends Canvas implements GameWindowCallback {
 		ship.y = height-ship.sprite.getHeight()-5;
 		entities.add(ship);
 		
-		// create a block of aliens (5 rows, by 12 aliens, spaced evenly)
 		alienCount = 0;
-		for (int row=0;row<5;row++) {
-			for (int x=0;x<12;x++) {
-				Entity alien = new AlienEntity(this,100+(x*50),(50)+row*30);
-				entities.add(alien);
-				alienCount++;
-			}
+		for (int x=0;x<level;x++) {
+			Entity alien = new AlienEntity(this,100+(x*50),(50)+30);
+			entities.add(alien);
+			alienCount++;
 		}
 	}
 	
@@ -169,6 +171,7 @@ public class Game extends Canvas implements GameWindowCallback {
 	 */
 	public void notifyWin() {
 		message = youWin;
+		level++;
 		waitingForKeyPress = true;
 	}
 	
@@ -210,6 +213,20 @@ public class Game extends Canvas implements GameWindowCallback {
 		lastFire = System.currentTimeMillis();
 		ShotEntity shot = new ShotEntity(this,"sprites/shot.gif",ship.getX()+10,ship.getY()-30);
 		entities.add(shot);
+	}
+
+	public void tryToFire2() {
+		// check that we have waiting long enough to fire
+		if (System.currentTimeMillis() - lastFire < firingInterval) {
+			return;
+		}
+		
+		// if we waited long enough, create the shot entity, and record the time.
+		lastFire = System.currentTimeMillis();
+		ShotEntity shotL = new ShotEntity(this,"sprites/shot.gif",ship.getX()+2,ship.getY()-22);
+		entities.add(shotL);
+		ShotEntity shotR = new ShotEntity(this,"sprites/shot.gif",ship.getX()+18,ship.getY()-22);
+		entities.add(shotR);
 	}
 	
 	/**
@@ -286,7 +303,7 @@ public class Game extends Canvas implements GameWindowCallback {
 		if (waitingForKeyPress) {
 			message.draw(325,250);
 		}
-		
+
 		// resolve the movemfent of the ship. First assume the ship 
 		// isn't moving. If either cursor key is pressed then
 		// update the movement appropraitely
@@ -297,7 +314,8 @@ public class Game extends Canvas implements GameWindowCallback {
 		boolean downPressed = getWindow().isKeyPressed(KeyEvent.VK_DOWN);
 		boolean leftPressed = getWindow().isKeyPressed(KeyEvent.VK_LEFT);
 		boolean rightPressed = getWindow().isKeyPressed(KeyEvent.VK_RIGHT);
-		boolean firePressed = getWindow().isKeyPressed(KeyEvent.VK_SPACE);
+		boolean firePressed = getWindow().isKeyPressed(KeyEvent.VK_SPACE) || getWindow().isLMousePressed(MouseEvent.BUTTON1);
+		boolean fire2Pressed = getWindow().isKeyPressed(KeyEvent.VK_SHIFT) || getWindow().isRMousePressed(MouseEvent.BUTTON1);
 		
 		if (!waitingForKeyPress) {
 			if ((upPressed) && (!downPressed)) {
@@ -311,9 +329,20 @@ public class Game extends Canvas implements GameWindowCallback {
 				ship.setHorizontalMovement(moveSpeed);
 			}
 			
+			if (!firePressed) {
+				fireHasBeenReleased = true;
+			}
+			if (!fire2Pressed) {
+				fire2HasBeenReleased = true;
+			}
+		
 			// if we're pressing fire, attempt to fire
-			if (firePressed) {
+			if (firePressed && fireHasBeenReleased) {
 				tryToFire();
+				fireHasBeenReleased = false;
+			}
+			if (fire2Pressed) {
+				tryToFire2();
 			}
 		} else {
 			if (!firePressed) {

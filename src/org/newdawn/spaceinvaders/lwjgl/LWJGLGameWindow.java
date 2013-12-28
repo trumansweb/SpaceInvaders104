@@ -185,6 +185,12 @@ public class LWJGLGameWindow implements GameWindow {
 		case KeyEvent.VK_SPACE:
 			keyCode = Keyboard.KEY_SPACE;
 			break;
+		case KeyEvent.VK_UP:
+			keyCode = Keyboard.KEY_UP;
+			break;
+		case KeyEvent.VK_DOWN:
+			keyCode = Keyboard.KEY_DOWN;
+			break;
 		case KeyEvent.VK_LEFT:
 			keyCode = Keyboard.KEY_LEFT;
 			break;

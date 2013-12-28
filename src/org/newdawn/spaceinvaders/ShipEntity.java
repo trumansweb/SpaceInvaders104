@@ -37,10 +37,15 @@ public class ShipEntity extends Entity {
 		}
 		// if we're moving right and have reached the right hand side
 		// of the screen, don't move
-		if ((dx > 0) && (x > 750)) {
+		if ((dx > 0) && (x > game.getWidth()-super.sprite.getWidth()-10)) {
 			return;
 		}
-		
+		if ((dy < 0) && (y < 10)) {
+			return;
+		}
+		if ((dy > 0) && (y > game.getHeight()-super.sprite.getHeight()-10)) {
+			return;
+		}		
 		super.move(delta);
 	}
 	

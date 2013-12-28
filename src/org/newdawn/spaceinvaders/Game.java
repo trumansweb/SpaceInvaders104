@@ -120,7 +120,9 @@ public class Game extends Canvas implements GameWindowCallback {
 	 */
 	private void initEntities() {
 		// create the player ship and place it roughly in the center of the screen
-		ship = new ShipEntity(this,"sprites/ship.gif",370,550);
+		ship = new ShipEntity(this,"sprites/ship.gif",0,0);
+		ship.x = width/2-ship.sprite.getWidth()/2;
+		ship.y = height-ship.sprite.getHeight()-5;
 		entities.add(ship);
 		
 		// create a block of aliens (5 rows, by 12 aliens, spaced evenly)
@@ -289,12 +291,20 @@ public class Game extends Canvas implements GameWindowCallback {
 		// isn't moving. If either cursor key is pressed then
 		// update the movement appropraitely
 		ship.setHorizontalMovement(0);
+		ship.setVerticalMovement(0);
 		
+		boolean upPressed = getWindow().isKeyPressed(KeyEvent.VK_UP);
+		boolean downPressed = getWindow().isKeyPressed(KeyEvent.VK_DOWN);
 		boolean leftPressed = getWindow().isKeyPressed(KeyEvent.VK_LEFT);
 		boolean rightPressed = getWindow().isKeyPressed(KeyEvent.VK_RIGHT);
 		boolean firePressed = getWindow().isKeyPressed(KeyEvent.VK_SPACE);
 		
 		if (!waitingForKeyPress) {
+			if ((upPressed) && (!downPressed)) {
+				ship.setVerticalMovement(-moveSpeed);
+			} else if ((downPressed) && (!upPressed)) {
+				ship.setVerticalMovement(moveSpeed);
+			}
 			if ((leftPressed) && (!rightPressed)) {
 				ship.setHorizontalMovement(-moveSpeed);
 			} else if ((rightPressed) && (!leftPressed)) {
@@ -362,5 +372,21 @@ public class Game extends Canvas implements GameWindowCallback {
 
 	public void setWindowTitle(String windowTitle) {
 		this.windowTitle = windowTitle;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+
+	public void setHeight(int height) {
+		this.height = height;
 	}
 }

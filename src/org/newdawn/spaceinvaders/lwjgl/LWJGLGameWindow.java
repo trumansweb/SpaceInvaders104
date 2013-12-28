@@ -1,6 +1,10 @@
 package org.newdawn.spaceinvaders.lwjgl;
 
+import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.event.KeyEvent;
+
+import javax.swing.JFrame;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
@@ -131,7 +135,20 @@ public class LWJGLGameWindow implements GameWindow {
 			GL11.glLoadIdentity();
 			
 			GL11.glOrtho(0, width, height, 0, -1, 1);
-			
+	        
+			Canvas Canvas = new Canvas();
+	        JFrame Frame = new JFrame(title);
+
+	        Frame.setSize(width, height);
+	        Frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	        Frame.setBackground(Color.BLACK);
+	        Frame.setUndecorated(true);
+	        Canvas.setBackground(Color.BLACK);
+	        Frame.getContentPane().add(Canvas);
+	        Frame.setLocationRelativeTo(null);
+	        Frame.setVisible(true);
+	        
+	        Display.setParent(Canvas);
 			textureLoader = new TextureLoader();
 			
 			if(callback != null) {

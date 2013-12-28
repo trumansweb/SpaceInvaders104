@@ -1,6 +1,8 @@
 package org.newdawn.spaceinvaders;
 
 import java.awt.Canvas;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
@@ -66,6 +68,11 @@ public class Game extends Canvas implements GameWindowCallback {
 	/** The normal title of the window */
 	private String windowTitle = "Space Invaders 104 - Version (0.4)";
 
+	/** The screen size */
+	GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+	private int width = gd.getDisplayMode().getWidth();
+	private int height = gd.getDisplayMode().getHeight();
+	
 	/**
 	 * Construct our game and set it running.
 	 * 
@@ -74,13 +81,13 @@ public class Game extends Canvas implements GameWindowCallback {
 	public Game(int renderingType) {
 		// create a window based on a chosen rendering method
 		ResourceFactory.get().setRenderingType(renderingType);
-		window = ResourceFactory.get().getGameWindow();
+		setWindow(ResourceFactory.get().getGameWindow());
 		
-		window.setResolution(800,600);
-		window.setGameWindowCallback(this);
-		window.setTitle(windowTitle);
+		getWindow().setResolution(width,height);
+		getWindow().setGameWindowCallback(this);
+		getWindow().setTitle(getWindowTitle());
 		
-		window.startRendering();
+		getWindow().startRendering();
 	}
 	
 	/**
@@ -220,7 +227,7 @@ public class Game extends Canvas implements GameWindowCallback {
 		
 		// update our FPS counter if a second has passed
 		if (lastFpsTime >= 1000) {
-			window.setTitle(windowTitle+" (FPS: "+fps+")");
+			getWindow().setTitle(getWindowTitle()+" (FPS: "+fps+")");
 			lastFpsTime = 0;
 			fps = 0;
 		}
@@ -283,9 +290,9 @@ public class Game extends Canvas implements GameWindowCallback {
 		// update the movement appropraitely
 		ship.setHorizontalMovement(0);
 		
-		boolean leftPressed = window.isKeyPressed(KeyEvent.VK_LEFT);
-		boolean rightPressed = window.isKeyPressed(KeyEvent.VK_RIGHT);
-		boolean firePressed = window.isKeyPressed(KeyEvent.VK_SPACE);
+		boolean leftPressed = getWindow().isKeyPressed(KeyEvent.VK_LEFT);
+		boolean rightPressed = getWindow().isKeyPressed(KeyEvent.VK_RIGHT);
+		boolean firePressed = getWindow().isKeyPressed(KeyEvent.VK_SPACE);
 		
 		if (!waitingForKeyPress) {
 			if ((leftPressed) && (!rightPressed)) {
@@ -310,7 +317,7 @@ public class Game extends Canvas implements GameWindowCallback {
 		}
 		
 		// if escape has been pressed, stop the game
-		if (window.isKeyPressed(KeyEvent.VK_ESCAPE)) {
+		if (getWindow().isKeyPressed(KeyEvent.VK_ESCAPE)) {
 			System.exit(0);
 		}
 	}
@@ -339,5 +346,21 @@ public class Game extends Canvas implements GameWindowCallback {
 		} else if (result == 2) {
 			new Game(ResourceFactory.OPENGL_LWJGL);
 		}
+	}
+
+	public GameWindow getWindow() {
+		return window;
+	}
+
+	public void setWindow(GameWindow window) {
+		this.window = window;
+	}
+
+	public String getWindowTitle() {
+		return windowTitle;
+	}
+
+	public void setWindowTitle(String windowTitle) {
+		this.windowTitle = windowTitle;
 	}
 }

@@ -76,7 +76,9 @@ public class Game extends Canvas implements GameWindowCallback {
 	private int width = gd.getDisplayMode().getWidth();
 	private int height = gd.getDisplayMode().getHeight();
 	private int level = 1;
-	private boolean fire2HasBeenReleased;
+	private boolean fire2HasBeenReleased = true;
+	private boolean pause = false;
+	private boolean pauseHasBeenReleased = true;
 	
 	/**
 	 * Construct our game and set it running.
@@ -252,7 +254,7 @@ public class Game extends Canvas implements GameWindowCallback {
 		}
 		
 		// cycle round asking each entity to move itself
-		if (!waitingForKeyPress) {
+		if (!waitingForKeyPress && !pause) {
 			for (int i=0;i<entities.size();i++) {
 				Entity entity = (Entity) entities.get(i);
 				
@@ -309,7 +311,17 @@ public class Game extends Canvas implements GameWindowCallback {
 		// update the movement appropraitely
 		ship.setHorizontalMovement(0);
 		ship.setVerticalMovement(0);
+		// if pause has been pressed, pause the game
+		boolean pausePressed = getWindow().isKeyPressed(KeyEvent.VK_P);
 		
+		if (!pausePressed) {
+			pauseHasBeenReleased  = true;
+		}
+		else if (pausePressed && pauseHasBeenReleased) {
+			if(!waitingForKeyPress) pause = pause ? false : true;
+			pauseHasBeenReleased = false;
+		}
+
 		boolean upPressed = getWindow().isKeyPressed(KeyEvent.VK_UP);
 		boolean downPressed = getWindow().isKeyPressed(KeyEvent.VK_DOWN);
 		boolean leftPressed = getWindow().isKeyPressed(KeyEvent.VK_LEFT);
@@ -317,7 +329,7 @@ public class Game extends Canvas implements GameWindowCallback {
 		boolean firePressed = getWindow().isKeyPressed(KeyEvent.VK_SPACE) || getWindow().isLMousePressed(MouseEvent.BUTTON1);
 		boolean fire2Pressed = getWindow().isKeyPressed(KeyEvent.VK_SHIFT) || getWindow().isRMousePressed(MouseEvent.BUTTON1);
 		
-		if (!waitingForKeyPress) {
+		if (!waitingForKeyPress && !pause) {
 			if ((upPressed) && (!downPressed)) {
 				ship.setVerticalMovement(-moveSpeed);
 			} else if ((downPressed) && (!upPressed)) {
@@ -341,10 +353,11 @@ public class Game extends Canvas implements GameWindowCallback {
 				tryToFire();
 				fireHasBeenReleased = false;
 			}
-			if (fire2Pressed) {
+			if (fire2Pressed && fire2HasBeenReleased) {
 				tryToFire2();
+				fire2HasBeenReleased = false;
 			}
-		} else {
+		} else if(!pause){
 			if (!firePressed) {
 				fireHasBeenReleased = true;
 			}
@@ -359,6 +372,7 @@ public class Game extends Canvas implements GameWindowCallback {
 		if (getWindow().isKeyPressed(KeyEvent.VK_ESCAPE)) {
 			System.exit(0);
 		}
+
 	}
 
 	/**

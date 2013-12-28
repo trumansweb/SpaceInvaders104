@@ -202,6 +202,9 @@ public class LWJGLGameWindow implements GameWindow {
 		case KeyEvent.VK_SHIFT:
 			keyCode = Keyboard.KEY_LSHIFT;
 			break;
+		case KeyEvent.VK_P:
+			keyCode = Keyboard.KEY_P;
+			break;
 		}    
 		
 		return org.lwjgl.input.Keyboard.isKeyDown(keyCode);

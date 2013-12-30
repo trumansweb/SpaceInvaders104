@@ -11,6 +11,9 @@ import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
+import org.lwjgl.opengl.GL11;
+import org.newdawn.spaceinvaders.lwjgl.SimpleText;
+
 /**
  * The main hook of our game. This class with both act as a manager
  * for the display and central mediator for the game logic. 
@@ -73,8 +76,8 @@ public class Game extends Canvas implements GameWindowCallback {
 
 	/** The screen size */
 	GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-	private int width = gd.getDisplayMode().getWidth();
-	private int height = gd.getDisplayMode().getHeight();
+	private int width = 800;//gd.getDisplayMode().getWidth();
+	private int height = 600;//gd.getDisplayMode().getHeight();
 	private int level = 1;
 	private boolean fire2HasBeenReleased = true;
 	private boolean pause = false;
@@ -311,6 +314,8 @@ public class Game extends Canvas implements GameWindowCallback {
 		// update the movement appropraitely
 		ship.setHorizontalMovement(0);
 		ship.setVerticalMovement(0);
+
+
 		// if pause has been pressed, pause the game
 		boolean pausePressed = getWindow().isKeyPressed(KeyEvent.VK_P);
 		
@@ -322,6 +327,7 @@ public class Game extends Canvas implements GameWindowCallback {
 			pauseHasBeenReleased = false;
 		}
 
+		if(pause) renderPause();
 		boolean upPressed = getWindow().isKeyPressed(KeyEvent.VK_UP);
 		boolean downPressed = getWindow().isKeyPressed(KeyEvent.VK_DOWN);
 		boolean leftPressed = getWindow().isKeyPressed(KeyEvent.VK_LEFT);
@@ -375,6 +381,12 @@ public class Game extends Canvas implements GameWindowCallback {
 
 	}
 
+	private void renderPause() {
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		SimpleText.drawString("Pause\nPress p to continue", 80, 70);
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+	}
+	
 	/**
 	 * Notifcation that the game window has been closed
 	 */

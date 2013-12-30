@@ -130,7 +130,7 @@ public class LWJGLGameWindow implements GameWindow {
 			// enable textures since we're going to use these for our sprites
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 			
-			// disable the OpenGL depth test since we're rendering 2D graphics
+			// disable the OpenGL depth test since we're rendering 2D graphics 
 			GL11.glDisable(GL11.GL_DEPTH_TEST);
 			
 			GL11.glMatrixMode(GL11.GL_PROJECTION);
@@ -249,7 +249,6 @@ public class LWJGLGameWindow implements GameWindow {
 				callback.frameRendering();
 			}
 			
-			// update window contents
 			Display.update();
 			
 			if(Display.isCloseRequested() || Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {

@@ -1,12 +1,7 @@
 package org.newdawn.spaceinvaders.lwjgl;
 
-import java.awt.Canvas;
-import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
@@ -87,11 +82,72 @@ public class LWJGLGameWindow implements GameWindow {
 		width = x;
 		height = y;
 	}
-	
+
 	/**
-	 * Sets the display mode for fullscreen mode
+	 * Set the display mode to be used
+	 *
+	 * @param width The width of the display required
+	 * @param height The height of the display required
+	 * @param fullscreen True if we want fullscreen mode
 	 */
-	private boolean setDisplayMode() {
+	public void setDisplayMode(boolean fullscreen) {
+
+		// return if requested DisplayMode is already set
+		if ((Display.getDisplayMode().getWidth() == width) &&
+				(Display.getDisplayMode().getHeight() == height) &&
+				(Display.isFullscreen() == fullscreen)) {
+			return;
+		}
+
+		try {
+			DisplayMode targetDisplayMode = null;
+
+			if (fullscreen) {
+				DisplayMode[] modes = Display.getAvailableDisplayModes();
+				int freq = 0;
+
+				for (int i=0;i<modes.length;i++) {
+					DisplayMode current = modes[i];
+
+					if ((current.getWidth() == width) && (current.getHeight() == height)) {
+						if ((targetDisplayMode == null) || (current.getFrequency() >= freq)) {
+							if ((targetDisplayMode == null) || (current.getBitsPerPixel() > targetDisplayMode.getBitsPerPixel())) {
+								targetDisplayMode = current;
+								freq = targetDisplayMode.getFrequency();
+							}
+						}
+
+						// if we've found a match for bpp and frequence against the
+						// original display mode then it's probably best to go for this one
+						// since it's most likely compatible with the monitor
+						if ((current.getBitsPerPixel() == Display.getDesktopDisplayMode().getBitsPerPixel()) &&
+								(current.getFrequency() == Display.getDesktopDisplayMode().getFrequency())) {
+							targetDisplayMode = current;
+							break;
+						}
+					}
+				}
+			} else {
+				targetDisplayMode = new DisplayMode(width,height);
+			}
+
+			if (targetDisplayMode == null) {
+				System.out.println("Failed to find value mode: "+width+"x"+height+" fs="+fullscreen);
+				return;
+			}
+
+			Display.setDisplayMode(targetDisplayMode);
+			Display.setFullscreen(fullscreen);
+
+		} catch (LWJGLException e) {
+			System.out.println("Unable to setup mode "+width+"x"+height+" fullscreen="+fullscreen + e);
+		}
+	}
+	
+/*	*//**
+	 * Sets the display mode for fullscreen mode
+	 *//*
+	private boolean setDisplayMode(boolean fullscreen) {
 		try {
 			// get modes
 			DisplayMode[] dm = org.lwjgl.util.Display.getAvailableDisplayModes(
@@ -104,7 +160,7 @@ public class LWJGLGameWindow implements GameWindow {
 					"bpp="
 							+ org.lwjgl.opengl.Display.getDisplayMode()
 									.getBitsPerPixel() });
-
+			Display.setFullscreen(fullscreen);
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -113,7 +169,7 @@ public class LWJGLGameWindow implements GameWindow {
 		}
 
 		return false;
-	}
+	}*/
 	
 	/**
 	 * Start the rendering process. This method will cause the display to redraw
@@ -121,9 +177,9 @@ public class LWJGLGameWindow implements GameWindow {
 	 */
 	public void startRendering() {
 		try {                
-			setDisplayMode();
+			setDisplayMode(false);
 			Display.create();
-			
+
 			// grab the mouse, dont want that hideous cursor when we're playing!
 			Mouse.setGrabbed(true);
   
@@ -138,7 +194,7 @@ public class LWJGLGameWindow implements GameWindow {
 			
 			GL11.glOrtho(0, width, height, 0, -1, 1);
 	        
-			Canvas Canvas = new Canvas();
+/*			Canvas Canvas = new Canvas();
 	        JFrame Frame = new JFrame(title);
 
 	        Frame.setSize(width, height);
@@ -150,7 +206,7 @@ public class LWJGLGameWindow implements GameWindow {
 	        Frame.setLocationRelativeTo(null);
 	        Frame.setVisible(true);
 	        
-	        Display.setParent(Canvas);
+	        Display.setParent(Canvas);*/
 			textureLoader = new TextureLoader();
 			
 			if(callback != null) {
@@ -232,7 +288,13 @@ public class LWJGLGameWindow implements GameWindow {
 		}
 		return org.lwjgl.input.Mouse.isButtonDown(mouseCode);
 	}
-  
+
+	public void renderPause() {
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		SimpleText.drawString("Pause\nPress p to continue", 80, 70);
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+	}
+	  
 	/**
 	 * Run the main game loop. This method keeps rendering the scene
 	 * and requesting that the callback update its screen.

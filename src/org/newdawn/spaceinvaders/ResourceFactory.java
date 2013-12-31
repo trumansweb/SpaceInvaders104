@@ -1,9 +1,9 @@
 package org.newdawn.spaceinvaders;
 
-import org.newdawn.spaceinvaders.java2d.Java2DGameWindow;
+/*import org.newdawn.spaceinvaders.java2d.Java2DGameWindow;
 import org.newdawn.spaceinvaders.java2d.Java2DSpriteStore;
 import org.newdawn.spaceinvaders.jogl.JoglGameWindow;
-import org.newdawn.spaceinvaders.jogl.JoglSprite;
+import org.newdawn.spaceinvaders.jogl.JoglSprite;*/
 import org.newdawn.spaceinvaders.lwjgl.LWJGLGameWindow;
 import org.newdawn.spaceinvaders.lwjgl.LWJGLSprite;
 
@@ -82,7 +82,7 @@ public class ResourceFactory {
 		// now
 		if (window == null) {
 			switch (renderingType) {
-				case JAVA2D:
+/*				case JAVA2D:
 				{
 					window = new Java2DGameWindow();
 					break;
@@ -91,7 +91,7 @@ public class ResourceFactory {
 				{
 					window = new JoglGameWindow();
 					break;
-				}
+				}*/
 				case OPENGL_LWJGL:
 				{
 					window = new LWJGLGameWindow();
@@ -116,14 +116,14 @@ public class ResourceFactory {
 		}
 		
 		switch (renderingType) {
-			case JAVA2D:
+/*			case JAVA2D:
 			{
 				return Java2DSpriteStore.get().getSprite((Java2DGameWindow) window,ref);
 			}
 			case OPENGL_JOGL:
 			{
 				return new JoglSprite((JoglGameWindow) window,ref);
-			}
+			}*/
 			case OPENGL_LWJGL:
 			{
 				return new LWJGLSprite((LWJGLGameWindow) window,ref);

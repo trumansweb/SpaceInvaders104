@@ -11,6 +11,8 @@ import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.spaceinvaders.lwjgl.SimpleText;
 
@@ -82,6 +84,7 @@ public class Game extends Canvas implements GameWindowCallback {
 	private boolean fire2HasBeenReleased = true;
 	private boolean pause = false;
 	private boolean pauseHasBeenReleased = true;
+	private boolean vsync = true;
 	
 	/**
 	 * Construct our game and set it running.
@@ -327,7 +330,20 @@ public class Game extends Canvas implements GameWindowCallback {
 			pauseHasBeenReleased = false;
 		}
 
-		if(pause) renderPause();
+		if(pause) getWindow().renderPause();
+		
+		while (Keyboard.next()) {
+			if (Keyboard.getEventKeyState()) {
+				if (Keyboard.getEventKey() == Keyboard.KEY_F) {
+					getWindow().setDisplayMode(!Display.isFullscreen());
+				}
+				else if (Keyboard.getEventKey() == Keyboard.KEY_V) {
+					vsync = !vsync;
+					Display.setVSyncEnabled(vsync);
+				}
+			}
+		}
+		
 		boolean upPressed = getWindow().isKeyPressed(KeyEvent.VK_UP);
 		boolean downPressed = getWindow().isKeyPressed(KeyEvent.VK_DOWN);
 		boolean leftPressed = getWindow().isKeyPressed(KeyEvent.VK_LEFT);
@@ -381,12 +397,6 @@ public class Game extends Canvas implements GameWindowCallback {
 
 	}
 
-	private void renderPause() {
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		SimpleText.drawString("Pause\nPress p to continue", 80, 70);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-	}
-	
 	/**
 	 * Notifcation that the game window has been closed
 	 */
@@ -401,8 +411,8 @@ public class Game extends Canvas implements GameWindowCallback {
 	 * 
 	 * @param argv The arguments that are passed into our game
 	 */
-	public static void main(String argv[]) {
-		int result = JOptionPane.showOptionDialog(null,"Java2D or OpenGL?","Java2D or OpenGL?",JOptionPane.YES_NO_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE,null,new String[] {"Java2D","JOGL","LWJGL"},null);
+	public static void main(String argv[]) {new Game(ResourceFactory.OPENGL_LWJGL);
+/*		int result = JOptionPane.showOptionDialog(null,"Java2D or OpenGL?","Java2D or OpenGL?",JOptionPane.YES_NO_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE,null,new String[] {"Java2D","JOGL","LWJGL"},null);
 		
 		if (result == 0) {
 			new Game(ResourceFactory.JAVA2D);
@@ -410,7 +420,7 @@ public class Game extends Canvas implements GameWindowCallback {
 			new Game(ResourceFactory.OPENGL_JOGL);
 		} else if (result == 2) {
 			new Game(ResourceFactory.OPENGL_LWJGL);
-		}
+		}*/
 	}
 
 	public GameWindow getWindow() {

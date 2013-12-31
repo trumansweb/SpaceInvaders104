@@ -47,4 +47,6 @@ public interface GameWindow {
 	public boolean isKeyPressed(int keyCode);
 	public boolean isLMousePressed(int mouseCode);
 	public boolean isRMousePressed(int mouseCode);
+	public void setDisplayMode(boolean fullscreen);
+	public void renderPause();
 }

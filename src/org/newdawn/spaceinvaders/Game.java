@@ -1,20 +1,15 @@
 package org.newdawn.spaceinvaders;
 
 import java.awt.Canvas;
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
-import javax.swing.JOptionPane;
-
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
-import org.newdawn.spaceinvaders.lwjgl.SimpleText;
+import org.lwjgl.util.Point;
 
 /**
  * The main hook of our game. This class with both act as a manager
@@ -139,10 +134,14 @@ public class Game extends Canvas implements GameWindowCallback {
 		entities.add(ship);
 		
 		alienCount = 0;
-		for (int x=0;x<level;x++) {
-			Entity alien = new AlienEntity(this,100+(x*50),(50)+30);
-			entities.add(alien);
+	    for (int x=0;x<10;x++){
+			entities.add(new AlienEntity(this,100+(x*50),30));
 			alienCount++;
+		    for (int y=0;y<level;y++){			
+				Entity alieny = new AlienEntity(this,100+(x*50),(50*y)+30);
+				entities.add(alieny);
+				alienCount++;
+			}
 		}
 	}
 	
@@ -241,7 +240,7 @@ public class Game extends Canvas implements GameWindowCallback {
 	 * Notification that a frame is being rendered. Responsible for
 	 * running game logic and rendering the scene.
 	 */
-	public void frameRendering() {		
+	public void frameRendering() {	
 		SystemTimer.sleep(lastLoopTime+10-SystemTimer.getTime());
 		
 		// work out how long its been since the last update, this
@@ -259,7 +258,9 @@ public class Game extends Canvas implements GameWindowCallback {
 			fps = 0;
 		}
 		
-		// cycle round asking each entity to move itself
+		
+		
+		// Entity moving
 		if (!waitingForKeyPress && !pause) {
 			for (int i=0;i<entities.size();i++) {
 				Entity entity = (Entity) entities.get(i);
@@ -318,20 +319,11 @@ public class Game extends Canvas implements GameWindowCallback {
 		ship.setHorizontalMovement(0);
 		ship.setVerticalMovement(0);
 
+		keyhandling();
+	}
 
-		// if pause has been pressed, pause the game
-		boolean pausePressed = getWindow().isKeyPressed(KeyEvent.VK_P);
-		
-		if (!pausePressed) {
-			pauseHasBeenReleased  = true;
-		}
-		else if (pausePressed && pauseHasBeenReleased) {
-			if(!waitingForKeyPress) pause = pause ? false : true;
-			pauseHasBeenReleased = false;
-		}
+	private void keyhandling() {
 
-		if(pause) getWindow().renderPause();
-		
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
 				if (Keyboard.getEventKey() == Keyboard.KEY_F) {
@@ -341,46 +333,51 @@ public class Game extends Canvas implements GameWindowCallback {
 					vsync = !vsync;
 					Display.setVSyncEnabled(vsync);
 				}
+				else if (Keyboard.getEventKey() == Keyboard.KEY_P) {
+					pause = !pause;
+				}
 			}
 		}
-		
-		boolean upPressed = getWindow().isKeyPressed(KeyEvent.VK_UP);
-		boolean downPressed = getWindow().isKeyPressed(KeyEvent.VK_DOWN);
-		boolean leftPressed = getWindow().isKeyPressed(KeyEvent.VK_LEFT);
-		boolean rightPressed = getWindow().isKeyPressed(KeyEvent.VK_RIGHT);
-		boolean firePressed = getWindow().isKeyPressed(KeyEvent.VK_SPACE) || getWindow().isLMousePressed(MouseEvent.BUTTON1);
-		boolean fire2Pressed = getWindow().isKeyPressed(KeyEvent.VK_SHIFT) || getWindow().isRMousePressed(MouseEvent.BUTTON1);
-		
-		if (!waitingForKeyPress && !pause) {
-			if ((upPressed) && (!downPressed)) {
-				ship.setVerticalMovement(-moveSpeed);
-			} else if ((downPressed) && (!upPressed)) {
-				ship.setVerticalMovement(moveSpeed);
-			}
-			if ((leftPressed) && (!rightPressed)) {
-				ship.setHorizontalMovement(-moveSpeed);
-			} else if ((rightPressed) && (!leftPressed)) {
-				ship.setHorizontalMovement(moveSpeed);
-			}
+		getWindow().renderText("Level: "+level, 370, 23);
+		if(pause) getWindow().renderText("Pause\nPress p to continue", 77, 33);
+		else{
+			boolean upPressed = getWindow().isKeyPressed(KeyEvent.VK_UP);
+			boolean downPressed = getWindow().isKeyPressed(KeyEvent.VK_DOWN);
+			boolean leftPressed = getWindow().isKeyPressed(KeyEvent.VK_LEFT);
+			boolean rightPressed = getWindow().isKeyPressed(KeyEvent.VK_RIGHT);
+			boolean firePressed = getWindow().isKeyPressed(KeyEvent.VK_SPACE) || getWindow().isLMousePressed(MouseEvent.BUTTON1);
+			boolean fire2Pressed = getWindow().isKeyPressed(KeyEvent.VK_SHIFT) || getWindow().isRMousePressed(MouseEvent.BUTTON1);
 			
-			if (!firePressed) {
-				fireHasBeenReleased = true;
+			if (!waitingForKeyPress) {
+				if ((upPressed) && (!downPressed)) {
+					ship.setVerticalMovement(-moveSpeed);
+				} else if ((downPressed) && (!upPressed)) {
+					ship.setVerticalMovement(moveSpeed);
+				}
+				if ((leftPressed) && (!rightPressed)) {
+					ship.setHorizontalMovement(-moveSpeed);
+				} else if ((rightPressed) && (!leftPressed)) {
+					ship.setHorizontalMovement(moveSpeed);
+				}
+				
+				if (!firePressed) {
+					fireHasBeenReleased = true;
+				}
+				if (!fire2Pressed) {
+					fire2HasBeenReleased = true;
+				}
+			
+				// if we're pressing fire, attempt to fire
+				if (firePressed && fireHasBeenReleased) {
+					tryToFire();
+					fireHasBeenReleased = false;
+				}
+				if (fire2Pressed && fire2HasBeenReleased) {
+					tryToFire2();
+					fire2HasBeenReleased = false;
+				}
 			}
-			if (!fire2Pressed) {
-				fire2HasBeenReleased = true;
-			}
-		
-			// if we're pressing fire, attempt to fire
-			if (firePressed && fireHasBeenReleased) {
-				tryToFire();
-				fireHasBeenReleased = false;
-			}
-			if (fire2Pressed && fire2HasBeenReleased) {
-				tryToFire2();
-				fire2HasBeenReleased = false;
-			}
-		} else if(!pause){
-			if (!firePressed) {
+			else if (!firePressed) {
 				fireHasBeenReleased = true;
 			}
 			if ((firePressed) && (fireHasBeenReleased)) {
@@ -411,7 +408,9 @@ public class Game extends Canvas implements GameWindowCallback {
 	 * 
 	 * @param argv The arguments that are passed into our game
 	 */
-	public static void main(String argv[]) {new Game(ResourceFactory.OPENGL_LWJGL);
+	public static void main(String argv[]) {
+		
+		new Game(ResourceFactory.OPENGL_LWJGL);
 /*		int result = JOptionPane.showOptionDialog(null,"Java2D or OpenGL?","Java2D or OpenGL?",JOptionPane.YES_NO_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE,null,new String[] {"Java2D","JOGL","LWJGL"},null);
 		
 		if (result == 0) {

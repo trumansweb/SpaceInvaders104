@@ -11,6 +11,7 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.spaceinvaders.GameWindow;
 import org.newdawn.spaceinvaders.GameWindowCallback;
+import org.newdawn.spaceinvaders.SystemTimer;
 
 /**
  * An implementation of GameWindow that will use OPENGL (JOGL) to 
@@ -39,6 +40,8 @@ public class LWJGLGameWindow implements GameWindow {
   
 	/** Title of window, we get it before our window is ready, so store it till needed */
 	private String title;
+
+	private boolean intro;
 	
 	/**
 	 * Create a new game window that will use OpenGL to 
@@ -289,9 +292,9 @@ public class LWJGLGameWindow implements GameWindow {
 		return org.lwjgl.input.Mouse.isButtonDown(mouseCode);
 	}
 
-	public void renderPause() {
+	public void renderText(String s, int x, int y) {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		SimpleText.drawString("Pause\nPress p to continue", 80, 70);
+		SimpleText.drawString(s, x, y);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 	  
@@ -305,9 +308,13 @@ public class LWJGLGameWindow implements GameWindow {
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			GL11.glMatrixMode(GL11.GL_MODELVIEW);
 			GL11.glLoadIdentity();
-			
-			// let subsystem paint
-			if (callback != null) {
+/*			
+			if (!intro) {
+				Intro();
+				//SystemTimer.sleep(3000);
+				//intro = true;
+			}
+			else */if (callback != null) {
 				callback.frameRendering();
 			}
 			
@@ -319,5 +326,9 @@ public class LWJGLGameWindow implements GameWindow {
 				callback.windowClosed();
 			}
 		}
+	}
+
+	private void Intro() {
+		SimpleText.drawString("Space Invaders 1.04.1", width/2, height/2);		
 	}
 }

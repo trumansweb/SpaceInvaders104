@@ -18,6 +18,7 @@ public class AlienEntity extends Entity {
 	private long frameDuration = 250;
 	/** The current frame of animation being displayed */
 	private int frameNumber;
+	private boolean used;
 	
 	/**
 	 * Create a new alien entity
@@ -37,6 +38,7 @@ public class AlienEntity extends Entity {
 		
 		this.game = game;
 		dx = -moveSpeed;
+		dy = moveSpeed/10;
 	}
 
 	/**
@@ -87,12 +89,12 @@ public class AlienEntity extends Entity {
 		// swap over horizontal movement and move down the
 		// screen a bit
 		dx = -dx;
-		y += 10;
+		//y += 10;
 		
 		// if we've reached the bottom of the screen then the player
 		// dies
 		if (y > 570) {
-			game.notifyDeath();
+			game.removeEntity(this);;
 		}
 	}
 	
@@ -102,6 +104,19 @@ public class AlienEntity extends Entity {
 	 * @param other The other entity
 	 */
 	public void collidedWith(Entity other) {
-		// collisions with aliens are handled elsewhere
+		if (used) {
+			return;
+		}
+		
+		// if we've hit an alien, kill it!
+		if (other instanceof ShotEntity) {
+			// remove the affected entities
+			game.removeEntity(this);
+			game.removeEntity(other);
+			
+			// notify the game that the alien has been killed
+			game.notifyAlienKilled();
+			used = true;
+		}
 	}
 }

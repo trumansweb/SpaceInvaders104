@@ -5,11 +5,17 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.util.Point;
+
+import sun.audio.AudioPlayer;
+import sun.audio.AudioStream;
 
 /**
  * The main hook of our game. This class with both act as a manager
@@ -106,7 +112,6 @@ public class Game extends Canvas implements GameWindowCallback {
 		youWin = ResourceFactory.get().getSprite("sprites/youwin.gif");
 		
 		message = pressAnyKey;
-		
 		// setup the initial game state
 		startGame();
 	}
@@ -226,7 +231,38 @@ public class Game extends Canvas implements GameWindowCallback {
 		lastFire = System.currentTimeMillis();
 		ShotEntity shot = new ShotEntity(this,"sprites/shot.gif",ship.getX()+10,ship.getY()-30);
 		entities.add(shot);
-	}
+/*		try {
+	        Clip clip = AudioSystem.getClip();
+	        AudioInputStream inputStream = AudioSystem.getAudioInputStream(
+	          Main.class.getResourceAsStream("E:/java/git/trumansweb/SpaceInvaders104/src/sounds/Blaster-Sound.wav"));
+	        clip.open(inputStream);
+	        clip.start(); 
+	      } catch (Exception e) {
+	        System.err.println(e.getMessage());
+	      }*/
+		InputStream in = null;
+		try {
+			in = new FileInputStream("E:/java/git/trumansweb/SpaceInvaders104/src/sounds/Blaster-Solo.wav");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// Create an AudioStream object from the input stream.
+		AudioStream as = null;
+		try {
+			as = new AudioStream(in);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}         
+
+		// Use the static class member "player" from class AudioPlayer to play
+		// clip.
+		AudioPlayer.player.start(as);            
+
+		// Similarly, to stop the audio.AudioPlayer.player.stop(as);
+		}
 
 	public void tryToFire2() {
 		// check that we have waiting long enough to fire

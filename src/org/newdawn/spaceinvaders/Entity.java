@@ -30,6 +30,7 @@ public abstract class Entity {
 	private Rectangle me = new Rectangle();
 	/** The rectangle used for other entities during collision resolution */
 	private Rectangle him = new Rectangle();
+	private int health = 100;
 	
 	/**
 	 * Construct a entity based on a sprite image and a location.
@@ -143,4 +144,11 @@ public abstract class Entity {
 	 * @param other The entity with which this entity collided.
 	 */
 	public abstract void collidedWith(Entity other);
+
+	public int getHealth() {
+		return health ;
+	}
+
+	public void setHealth(int health) {
+	}
 }

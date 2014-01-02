@@ -78,7 +78,6 @@ public class Game extends Canvas implements GameWindowCallback {
 	private int level = 1;
 	private boolean fire2HasBeenReleased = true;
 	private boolean pause = false;
-	private boolean pauseHasBeenReleased = true;
 	private boolean vsync = true;
 	
 	/**
@@ -162,6 +161,13 @@ public class Game extends Canvas implements GameWindowCallback {
 	 */
 	public void removeEntity(Entity entity) {
 		removeList.add(entity);
+	}
+
+	public void updateHealth(Entity first, Entity second) {
+		/**
+		 * TODO: add strength and calculate against
+		 */
+		first.setHealth(first.getHealth()-20);
 	}
 	
 	/**

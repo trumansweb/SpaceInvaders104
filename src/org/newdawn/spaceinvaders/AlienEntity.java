@@ -19,6 +19,7 @@ public class AlienEntity extends Entity {
 	/** The current frame of animation being displayed */
 	private int frameNumber;
 	private boolean used;
+	private int health = 100;
 	
 	/**
 	 * Create a new alien entity
@@ -104,19 +105,24 @@ public class AlienEntity extends Entity {
 	 * @param other The other entity
 	 */
 	public void collidedWith(Entity other) {
-		if (used) {
-			return;
-		}
 		
-		// if we've hit an alien, kill it!
+		if(used) return;
+		
 		if (other instanceof ShotEntity) {
-			// remove the affected entities
-			game.removeEntity(this);
 			game.removeEntity(other);
-			
-			// notify the game that the alien has been killed
-			game.notifyAlienKilled();
-			used = true;
+			game.updateHealth(this, other);
+			if(health <= 0){
+				used = true;
+				game.notifyAlienKilled();
+				game.removeEntity(this);
+			}
 		}
+	}
+	public int getHealth() {
+		return health ;
+	}
+
+	public void setHealth(int health) {
+		this.health = health;
 	}
 }

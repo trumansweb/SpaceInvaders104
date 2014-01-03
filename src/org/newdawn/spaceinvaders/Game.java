@@ -5,18 +5,11 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
-import org.truman.sound.Sound;
-
-import sun.audio.AudioPlayer;
-import sun.audio.AudioStream;
+import org.truman.sound.SoundManager;
 
 /**
  * The main hook of our game. This class with both act as a manager
@@ -86,7 +79,11 @@ public class Game extends Canvas implements GameWindowCallback {
 	private boolean fire2HasBeenReleased = true;
 	private boolean pause = false;
 	private boolean vsync = true;
-	private Sound sound;
+	
+	private SoundManager sm;
+	private int sb1;
+	private int sb2;
+
 	/**
 	 * Construct our game and set it running.
 	 * 
@@ -113,7 +110,10 @@ public class Game extends Canvas implements GameWindowCallback {
 		youWin = ResourceFactory.get().getSprite("sprites/youwin.gif");
 		
 		message = pressAnyKey;
-		sound = new Sound();
+		sm = new SoundManager();
+		sm.initialize(1);
+		sb1 = sm.addSound("sounds/sparo.wav");
+		sb2 = sm.addSound("sounds/Blaster-Solo.wav");
 		startGame();
 	}
 	
@@ -232,7 +232,7 @@ public class Game extends Canvas implements GameWindowCallback {
 		lastFire = System.currentTimeMillis();
 		ShotEntity shot = new ShotEntity(this,"sprites/shot.gif",ship.getX()+10,ship.getY()-30);
 		entities.add(shot);
-		sound.play();
+		sm.playSound(sb1);
 	}
 
 	public void tryToFire2() {
@@ -247,26 +247,7 @@ public class Game extends Canvas implements GameWindowCallback {
 		entities.add(shotL);
 		ShotEntity shotR = new ShotEntity(this,"sprites/shot.gif",ship.getX()+18,ship.getY()-22);
 		entities.add(shotR);
-		InputStream in = null;
-		try {
-			in = new FileInputStream("E:/java/git/trumansweb/SpaceInvaders104/src/sounds/Blaster-Solo.wav");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		// Create an AudioStream object from the input stream.
-		AudioStream as = null;
-		try {
-			as = new AudioStream(in);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}         
-
-		// Use the static class member "player" from class AudioPlayer to play
-		// clip.
-		AudioPlayer.player.start(as);            
+		sm.playSound(sb2);
 
 	}
 	

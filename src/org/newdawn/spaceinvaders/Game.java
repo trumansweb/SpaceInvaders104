@@ -13,6 +13,7 @@ import java.util.ArrayList;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
+import org.truman.sound.Sound;
 
 import sun.audio.AudioPlayer;
 import sun.audio.AudioStream;
@@ -85,7 +86,7 @@ public class Game extends Canvas implements GameWindowCallback {
 	private boolean fire2HasBeenReleased = true;
 	private boolean pause = false;
 	private boolean vsync = true;
-	
+	private Sound sound;
 	/**
 	 * Construct our game and set it running.
 	 * 
@@ -112,7 +113,7 @@ public class Game extends Canvas implements GameWindowCallback {
 		youWin = ResourceFactory.get().getSprite("sprites/youwin.gif");
 		
 		message = pressAnyKey;
-		// setup the initial game state
+		sound = new Sound();
 		startGame();
 	}
 	
@@ -231,15 +232,21 @@ public class Game extends Canvas implements GameWindowCallback {
 		lastFire = System.currentTimeMillis();
 		ShotEntity shot = new ShotEntity(this,"sprites/shot.gif",ship.getX()+10,ship.getY()-30);
 		entities.add(shot);
-/*		try {
-	        Clip clip = AudioSystem.getClip();
-	        AudioInputStream inputStream = AudioSystem.getAudioInputStream(
-	          Main.class.getResourceAsStream("E:/java/git/trumansweb/SpaceInvaders104/src/sounds/Blaster-Sound.wav"));
-	        clip.open(inputStream);
-	        clip.start(); 
-	      } catch (Exception e) {
-	        System.err.println(e.getMessage());
-	      }*/
+		sound.play();
+	}
+
+	public void tryToFire2() {
+		// check that we have waiting long enough to fire
+		if (System.currentTimeMillis() - lastFire < firingInterval) {
+			return;
+		}
+		
+		// if we waited long enough, create the shot entity, and record the time.
+		lastFire = System.currentTimeMillis();
+		ShotEntity shotL = new ShotEntity(this,"sprites/shot.gif",ship.getX()+2,ship.getY()-22);
+		entities.add(shotL);
+		ShotEntity shotR = new ShotEntity(this,"sprites/shot.gif",ship.getX()+18,ship.getY()-22);
+		entities.add(shotR);
 		InputStream in = null;
 		try {
 			in = new FileInputStream("E:/java/git/trumansweb/SpaceInvaders104/src/sounds/Blaster-Solo.wav");
@@ -261,21 +268,6 @@ public class Game extends Canvas implements GameWindowCallback {
 		// clip.
 		AudioPlayer.player.start(as);            
 
-		// Similarly, to stop the audio.AudioPlayer.player.stop(as);
-		}
-
-	public void tryToFire2() {
-		// check that we have waiting long enough to fire
-		if (System.currentTimeMillis() - lastFire < firingInterval) {
-			return;
-		}
-		
-		// if we waited long enough, create the shot entity, and record the time.
-		lastFire = System.currentTimeMillis();
-		ShotEntity shotL = new ShotEntity(this,"sprites/shot.gif",ship.getX()+2,ship.getY()-22);
-		entities.add(shotL);
-		ShotEntity shotR = new ShotEntity(this,"sprites/shot.gif",ship.getX()+18,ship.getY()-22);
-		entities.add(shotR);
 	}
 	
 	/**

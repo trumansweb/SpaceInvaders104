@@ -124,6 +124,9 @@ public abstract class Entity {
 	public int getY() {
 		return (int) y;
 	}
+	public double getYd() {
+		return y;
+	}
 	
 	/**
 	 * Check if this entity collised with another.

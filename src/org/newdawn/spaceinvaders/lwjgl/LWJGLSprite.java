@@ -39,6 +39,7 @@ public class LWJGLSprite implements Sprite {
 			// a tad abrupt, but our purposes if you can't find a 
 			// sprite's image you might as well give up.
 			System.err.println("Unable to load texture: "+ref);
+			e.printStackTrace();
 			System.exit(0);
 		}
 	}

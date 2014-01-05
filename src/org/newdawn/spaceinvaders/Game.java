@@ -1,6 +1,7 @@
 package org.newdawn.spaceinvaders;
 
 import java.awt.Canvas;
+import java.awt.Component;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
@@ -29,6 +30,8 @@ import org.truman.sound.SoundManager;
 public class Game extends Canvas implements GameWindowCallback {
 	/** The list of all the entities that exist in our game */
 	private ArrayList entities = new ArrayList();
+	/** The list of all moving entities like backgrounds that exist in our game */
+	private ArrayList globalEntities = new ArrayList();
 	/** The list of entities that need to be removed from the game this loop */
 	private ArrayList removeList = new ArrayList();
 	/** The entity representing the player */
@@ -83,6 +86,7 @@ public class Game extends Canvas implements GameWindowCallback {
 	private SoundManager sm;
 	private int sb1;
 	private int sb2;
+	private Sprite bg;
 
 	/**
 	 * Construct our game and set it running.
@@ -105,16 +109,24 @@ public class Game extends Canvas implements GameWindowCallback {
 	 * Intialise the common elements for the game
 	 */
 	public void initialise() {
+		
+		//bg = ResourceFactory.get().getSprite("sprites/geo.gif");
 		gotYou = ResourceFactory.get().getSprite("sprites/gotyou.gif");
 		pressAnyKey = ResourceFactory.get().getSprite("sprites/pressanykey.gif");
 		youWin = ResourceFactory.get().getSprite("sprites/youwin.gif");
 		
 		message = pressAnyKey;
+
 		sm = new SoundManager();
 		sm.initialize(1);
 		sb1 = sm.addSound("sounds/sparo.wav");
 		sb2 = sm.addSound("sounds/Blaster-Solo.wav");
+
+		// background sprite
+		bg = ResourceFactory.get().getSprite("sprites/geo.gif");
+		
 		startGame();
+	
 	}
 	
 	/**
@@ -132,11 +144,17 @@ public class Game extends Canvas implements GameWindowCallback {
 	 * entitiy will be added to the overall list of entities in the game.
 	 */
 	private void initEntities() {
+		
 		// create the player ship and place it roughly in the center of the screen
 		ship = new ShipEntity(this,"sprites/ship.gif",0,0);
 		ship.x = width/2-ship.sprite.getWidth()/2;
 		ship.y = height-ship.sprite.getHeight()-5;
 		entities.add(ship);
+		// background
+		for (int i = 1; i < 120; i++) {
+			globalEntities.add(new GlobalEntity(this, "sprites/geo.gif", 0, height - bg.getHeight()*i));
+			globalEntities.add(new GlobalEntity(this, "sprites/geo.gif", width - bg.getWidth(), height - bg.getHeight()*i));
+		}
 		
 		alienCount = 0;
 	    for (int x=0;x<10;x++){
@@ -273,17 +291,29 @@ public class Game extends Canvas implements GameWindowCallback {
 			fps = 0;
 		}
 		
-		
-		
-		// Entity moving
 		if (!waitingForKeyPress && !pause) {
+			// Entity moving
 			for (int i=0;i<entities.size();i++) {
-				Entity entity = (Entity) entities.get(i);
-				
+				Entity entity = (Entity) entities.get(i);				
 				entity.move(delta);
+			}
+			// Background moving
+			for (int i=0;i<globalEntities.size();i++) {
+				Entity entity = (Entity) globalEntities.get(i);
+				if(entity.getY() >= height){
+					globalEntities.remove(i);
+				}
+				else{
+					entity.setVerticalMovement(120);
+					entity.move(delta);
+				}
 			}
 		}
 		
+		for (int i=0;i<globalEntities.size();i++) {
+			Entity entity = (Entity) globalEntities.get(i);
+			entity.draw();
+		}
 		// cycle round drawing all the entities we have in the game
 		for (int i=0;i<entities.size();i++) {
 			Entity entity = (Entity) entities.get(i);

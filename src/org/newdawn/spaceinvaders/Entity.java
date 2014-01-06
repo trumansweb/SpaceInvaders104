@@ -39,12 +39,18 @@ public abstract class Entity {
  	 * @param x The initial x location of this entity
 	 * @param y The initial y location of this entity
 	 */
-	public Entity(String ref,int x,int y) {
+	public Entity(String ref, double x, double y) {
 		this.sprite = ResourceFactory.get().getSprite(ref);
 		this.x = x;
 		this.y = y;
 	}
 	
+	public Entity(Sprite sprite, double x, double y) {
+		this.sprite = sprite;
+		this.x = x;
+		this.y = y;
+	}
+
 	/**
 	 * Request that this entity move itself based on a certain ammount
 	 * of time passing.

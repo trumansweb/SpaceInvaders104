@@ -1,7 +1,6 @@
 package org.newdawn.spaceinvaders;
 
 import java.awt.Canvas;
-import java.awt.Component;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
@@ -29,9 +28,9 @@ import org.truman.sound.SoundManager;
  */
 public class Game extends Canvas implements GameWindowCallback {
 	/** The list of all the entities that exist in our game */
-	private ArrayList entities = new ArrayList();
+	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	/** The list of all moving entities like backgrounds that exist in our game */
-	private ArrayList globalEntities = new ArrayList();
+	private ArrayList<GlobalEntity> globalEntities = new ArrayList<GlobalEntity>();
 	/** The list of entities that need to be removed from the game this loop */
 	private ArrayList removeList = new ArrayList();
 	/** The entity representing the player */
@@ -122,9 +121,6 @@ public class Game extends Canvas implements GameWindowCallback {
 		sb1 = sm.addSound("sounds/sparo.wav");
 		sb2 = sm.addSound("sounds/Blaster-Solo.wav");
 
-		// background sprite
-		bg = ResourceFactory.get().getSprite("sprites/geo.gif");
-		
 		startGame();
 	
 	}
@@ -140,8 +136,8 @@ public class Game extends Canvas implements GameWindowCallback {
 	}
 	
 	/**
-	 * Initialise the starting state of the entities (ship and aliens). Each
-	 * entitiy will be added to the overall list of entities in the game.
+	 * Initialize the starting state of the entities (ship and aliens). Each
+	 * entity will be added to the overall list of entities in the game.
 	 */
 	private void initEntities() {
 		
@@ -150,11 +146,14 @@ public class Game extends Canvas implements GameWindowCallback {
 		ship.x = width/2-ship.sprite.getWidth()/2;
 		ship.y = height-ship.sprite.getHeight()-5;
 		entities.add(ship);
-		// background
-		for (int i = 1; i < 120; i++) {
-			globalEntities.add(new GlobalEntity(this, "sprites/geo.gif", 0, height - bg.getHeight()*i));
-			globalEntities.add(new GlobalEntity(this, "sprites/geo.gif", width - bg.getWidth(), height - bg.getHeight()*i));
-		}
+
+		// background setup
+		// the sprite to repeat
+		bg = ResourceFactory.get().getSprite("sprites/bg.gif");
+		// fill the screen
+		for (int i = 1; i <= (int)(height/bg.getHeight()+2); i++)
+			for (int j = 0; j < (int)(width/bg.getWidth()+1); j++)
+				globalEntities.add(new GlobalEntity(this, bg, bg.getWidth()*j, height - bg.getHeight()*i));
 		
 		alienCount = 0;
 	    for (int x=0;x<10;x++){
@@ -290,26 +289,25 @@ public class Game extends Canvas implements GameWindowCallback {
 			lastFpsTime = 0;
 			fps = 0;
 		}
-		
+		ArrayList removeList1 = new ArrayList();
+		double bgy = 0;int x=0;
 		if (!waitingForKeyPress && !pause) {
 			// Entity moving
 			for (int i=0;i<entities.size();i++) {
-				Entity entity = (Entity) entities.get(i);				
+				Entity entity = (Entity) entities.get(i);		
 				entity.move(delta);
 			}
 			// Background moving
 			for (int i=0;i<globalEntities.size();i++) {
-				Entity entity = (Entity) globalEntities.get(i);
-				if(entity.getY() >= height){
-					globalEntities.remove(i);
+				GlobalEntity entity = (GlobalEntity) globalEntities.get(i);
+				if(entity.y >= height){
+					entity = new GlobalEntity(this, bg, entity.x, entity.y-((int)(height/bg.getHeight()+2)*bg.getHeight()));
+					globalEntities.set(i, entity);
 				}
-				else{
-					entity.setVerticalMovement(120);
-					entity.move(delta);
-				}
+				entity.setVerticalMovement(120);
+				entity.move(delta);
 			}
 		}
-		
 		for (int i=0;i<globalEntities.size();i++) {
 			Entity entity = (Entity) globalEntities.get(i);
 			entity.draw();

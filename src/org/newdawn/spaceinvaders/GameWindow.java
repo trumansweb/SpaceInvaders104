@@ -1,8 +1,5 @@
 package org.newdawn.spaceinvaders;
 
-import org.lwjgl.opengl.GL11;
-import org.newdawn.spaceinvaders.lwjgl.SimpleText;
-
 /**
  * The window in which the game will be displayed. This interface exposes just
  * enough to allow the game logic to interact with, while still maintaining an

@@ -11,7 +11,6 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.spaceinvaders.GameWindow;
 import org.newdawn.spaceinvaders.GameWindowCallback;
-import org.newdawn.spaceinvaders.SystemTimer;
 
 /**
  * An implementation of GameWindow that will use OPENGL (JOGL) to 
@@ -39,6 +38,7 @@ public class LWJGLGameWindow implements GameWindow {
 	private TextureLoader textureLoader;
   
 	/** Title of window, we get it before our window is ready, so store it till needed */
+	@SuppressWarnings("unused")
 	private String title;
 
 	private boolean intro;
@@ -328,7 +328,16 @@ public class LWJGLGameWindow implements GameWindow {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void Intro() {
 		SimpleText.drawString("Space Invaders 1.04.1", width/2, height/2);		
+	}
+
+	public boolean isIntro() {
+		return intro;
+	}
+
+	public void setIntro(boolean intro) {
+		this.intro = intro;
 	}
 }

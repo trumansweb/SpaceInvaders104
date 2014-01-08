@@ -8,6 +8,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.truman.sound.SoundManager;
 
@@ -27,12 +28,14 @@ import org.truman.sound.SoundManager;
  * @author Kevin Glass
  */
 public class Game extends Canvas implements GameWindowCallback {
+	
+	private static final long serialVersionUID = 1L;
 	/** The list of all the entities that exist in our game */
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	/** The list of all moving entities like backgrounds that exist in our game */
-	private ArrayList<GlobalEntity> globalEntities = new ArrayList<GlobalEntity>();
+	private ArrayList<GlobalEntity> backgroundEntities = new ArrayList<GlobalEntity>();
 	/** The list of entities that need to be removed from the game this loop */
-	private ArrayList removeList = new ArrayList();
+	private ArrayList<Entity> removeList = new ArrayList<Entity>();
 	/** The entity representing the player */
 	private Entity ship;
 	/** The speed at which the player's ship should move (pixels/sec) */
@@ -82,10 +85,13 @@ public class Game extends Canvas implements GameWindowCallback {
 	private boolean pause = false;
 	private boolean vsync = true;
 	
-	private SoundManager sm;
+/*	private SoundManager sm;
 	private int sb1;
 	private int sb2;
-	private Sprite bg;
+*/	private Sprite bg;
+private SoundManager sm;
+private int sb1;
+private int sb2;
 
 	/**
 	 * Construct our game and set it running.
@@ -109,7 +115,7 @@ public class Game extends Canvas implements GameWindowCallback {
 	 */
 	public void initialise() {
 		
-		//bg = ResourceFactory.get().getSprite("sprites/geo.gif");
+		bg = ResourceFactory.get().getSprite("sprites/152.gif");
 		gotYou = ResourceFactory.get().getSprite("sprites/gotyou.gif");
 		pressAnyKey = ResourceFactory.get().getSprite("sprites/pressanykey.gif");
 		youWin = ResourceFactory.get().getSprite("sprites/youwin.gif");
@@ -148,13 +154,11 @@ public class Game extends Canvas implements GameWindowCallback {
 		entities.add(ship);
 
 		// background setup
-		// the sprite to repeat
-		bg = ResourceFactory.get().getSprite("sprites/bg.gif");
 		// fill the screen
 		for (int i = 1; i <= (int)(height/bg.getHeight()+2); i++)
 			for (int j = 0; j < (int)(width/bg.getWidth()+1); j++)
-				globalEntities.add(new GlobalEntity(this, bg, bg.getWidth()*j, height - bg.getHeight()*i));
-		
+				backgroundEntities.add(new GlobalEntity(this, bg, bg.getWidth()*j, height - bg.getHeight()*i));
+		// arrange enemies
 		alienCount = 0;
 	    for (int x=0;x<10;x++){
 			entities.add(new AlienEntity(this,100+(x*50),30));
@@ -165,6 +169,7 @@ public class Game extends Canvas implements GameWindowCallback {
 				alienCount++;
 			}
 		}
+	    backgroundEntities.add(new GlobalEntity(this, "sprites/brick.gif", 340, 50));
 	}
 	
 	/**
@@ -249,6 +254,7 @@ public class Game extends Canvas implements GameWindowCallback {
 		lastFire = System.currentTimeMillis();
 		ShotEntity shot = new ShotEntity(this,"sprites/shot.gif",ship.getX()+10,ship.getY()-30);
 		entities.add(shot);
+		//sparo.playAsSoundEffect(1.0f, 1.0f, false);
 		sm.playSound(sb1);
 	}
 
@@ -289,8 +295,6 @@ public class Game extends Canvas implements GameWindowCallback {
 			lastFpsTime = 0;
 			fps = 0;
 		}
-		ArrayList removeList1 = new ArrayList();
-		double bgy = 0;int x=0;
 		if (!waitingForKeyPress && !pause) {
 			// Entity moving
 			for (int i=0;i<entities.size();i++) {
@@ -298,18 +302,18 @@ public class Game extends Canvas implements GameWindowCallback {
 				entity.move(delta);
 			}
 			// Background moving
-			for (int i=0;i<globalEntities.size();i++) {
-				GlobalEntity entity = (GlobalEntity) globalEntities.get(i);
+			for (int i=0;i<backgroundEntities.size();i++) {
+				GlobalEntity entity = (GlobalEntity) backgroundEntities.get(i);
 				if(entity.y >= height){
 					entity = new GlobalEntity(this, bg, entity.x, entity.y-((int)(height/bg.getHeight()+2)*bg.getHeight()));
-					globalEntities.set(i, entity);
+					backgroundEntities.set(i, entity);
 				}
 				entity.setVerticalMovement(120);
 				entity.move(delta);
 			}
 		}
-		for (int i=0;i<globalEntities.size();i++) {
-			Entity entity = (Entity) globalEntities.get(i);
+		for (int i=0;i<backgroundEntities.size();i++) {
+			Entity entity = (Entity) backgroundEntities.get(i);
 			entity.draw();
 		}
 		// cycle round drawing all the entities we have in the game
@@ -441,6 +445,7 @@ public class Game extends Canvas implements GameWindowCallback {
 	 * Notifcation that the game window has been closed
 	 */
 	public void windowClosed() {
+		AL.destroy();
 		System.exit(0);
 	}
 	

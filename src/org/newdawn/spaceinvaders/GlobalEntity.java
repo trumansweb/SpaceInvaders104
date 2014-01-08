@@ -15,13 +15,13 @@ public class GlobalEntity extends Entity{
 	public GlobalEntity(Game game, String ref, double x, double y) {
 		super(ref,x,y);
 
-		this.game = game;
+		this.setGame(game);
 	}
 
 	public GlobalEntity(Game game, Sprite sprite, double x, double y) {
 		super(sprite,x,y);
 
-		this.game = game;
+		this.setGame(game);
 	}
 
 	/**
@@ -40,5 +40,13 @@ public class GlobalEntity extends Entity{
 	 * @param other The entity with which this entity has collided
 	 */
 	public void collidedWith(Entity other) {
+	}
+
+	public Game getGame() {
+		return game;
+	}
+
+	public void setGame(Game game) {
+		this.game = game;
 	}
 }

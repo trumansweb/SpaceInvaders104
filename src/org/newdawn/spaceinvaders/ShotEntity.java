@@ -53,4 +53,12 @@ public class ShotEntity extends Entity {
 	public void collidedWith(Entity other) {
 
 	}
+
+	public boolean isUsed() {
+		return used;
+	}
+
+	public void setUsed(boolean used) {
+		this.used = used;
+	}
 }

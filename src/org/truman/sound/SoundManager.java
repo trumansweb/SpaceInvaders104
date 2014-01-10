@@ -98,8 +98,11 @@ public class SoundManager {
    */
   public void playSound(int buffer) {
     if(soundOutput) {
-      AL10.alSourcei(sources[sources.length-1], AL10.AL_BUFFER, buffers[buffer]);
-      AL10.alSourcePlay(sources[sources.length-1]);
+      if(isPlayingSound()) playEffect(buffer);
+      else{
+    	AL10.alSourcei(sources[sources.length-1], AL10.AL_BUFFER, buffers[buffer]);
+        AL10.alSourcePlay(sources[sources.length-1]);
+      }
     }
   }
 

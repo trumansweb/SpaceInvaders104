@@ -115,7 +115,6 @@ private int sb2;
 	 */
 	public void initialise() {
 		
-		bg = ResourceFactory.get().getSprite("sprites/152.gif");
 		gotYou = ResourceFactory.get().getSprite("sprites/gotyou.gif");
 		pressAnyKey = ResourceFactory.get().getSprite("sprites/pressanykey.gif");
 		youWin = ResourceFactory.get().getSprite("sprites/youwin.gif");
@@ -123,9 +122,11 @@ private int sb2;
 		message = pressAnyKey;
 
 		sm = new SoundManager();
-		sm.initialize(1);
+		sm.initialize(4);
 		sb1 = sm.addSound("sounds/sparo.wav");
 		sb2 = sm.addSound("sounds/Blaster-Solo.wav");
+		int bgm = sm.addSound("sounds/The Terminator (1984) Theme.wav");
+		sm.playSound(bgm);
 
 		startGame();
 	
@@ -154,6 +155,17 @@ private int sb2;
 		entities.add(ship);
 
 		// background setup
+		switch (level) {
+		case 1:
+			bg = ResourceFactory.get().getSprite("sprites/152.gif");
+			break;
+		case 2:
+			bg = ResourceFactory.get().getSprite("sprites/bg2.gif");
+			break;
+		default:
+			bg = ResourceFactory.get().getSprite("sprites/152.gif");
+			break;
+		}
 		// fill the screen
 		for (int i = 1; i <= (int)(height/bg.getHeight()+2); i++)
 			for (int j = 0; j < (int)(width/bg.getWidth()+1); j++)
@@ -169,7 +181,7 @@ private int sb2;
 				alienCount++;
 			}
 		}
-	    backgroundEntities.add(new GlobalEntity(this, "sprites/brick.gif", 340, 50));
+	    //backgroundEntities.add(new GlobalEntity(this, "sprites/brick.gif", 340, 50));
 	}
 	
 	/**
@@ -445,7 +457,7 @@ private int sb2;
 	 * Notifcation that the game window has been closed
 	 */
 	public void windowClosed() {
-		AL.destroy();
+		sm.destroy();
 		System.exit(0);
 	}
 	

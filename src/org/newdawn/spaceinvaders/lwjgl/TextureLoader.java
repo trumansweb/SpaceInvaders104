@@ -148,8 +148,10 @@ public class TextureLoader {
         { 
             GL11.glTexParameteri(target, GL11.GL_TEXTURE_MIN_FILTER, minFilter); 
             GL11.glTexParameteri(target, GL11.GL_TEXTURE_MAG_FILTER, magFilter); 
-        } 
- 
+        }
+        // enables transparency
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         // produce a texture from the byte buffer
         GL11.glTexImage2D(target, 
                       0, 

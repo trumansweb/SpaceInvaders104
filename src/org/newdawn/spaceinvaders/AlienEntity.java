@@ -92,10 +92,10 @@ public class AlienEntity extends Entity {
 		dx = -dx;
 		//y += 10;
 		
-		// if we've reached the bottom of the screen then the player
-		// dies
-		if (y > 570) {
-			game.removeEntity(this);;
+		// if we've reached the bottom of the screen then
+		// put it on top
+		if (y > game.getHeight()) {
+			y = 0 - this.sprite.getHeight();
 		}
 	}
 	

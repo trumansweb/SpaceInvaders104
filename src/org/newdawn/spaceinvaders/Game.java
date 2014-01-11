@@ -8,7 +8,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.truman.sound.SoundManager;
 
@@ -28,7 +27,7 @@ import org.truman.sound.SoundManager;
  * @author Kevin Glass
  */
 public class Game extends Canvas implements GameWindowCallback {
-	
+
 	private static final long serialVersionUID = 1L;
 	/** The list of all the entities that exist in our game */
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
@@ -46,7 +45,7 @@ public class Game extends Canvas implements GameWindowCallback {
 	private long firingInterval = 100;
 	/** The number of aliens left on the screen */
 	private int alienCount;
-	
+
 	/** The message to display which waiting for a key press */
 	private Sprite message;
 	/** True if we're holding up game play until a key has been pressed */
@@ -60,19 +59,19 @@ public class Game extends Canvas implements GameWindowCallback {
 	private GameWindow window;
 	/** True if the fire key has been released */
 	private boolean fireHasBeenReleased = false;
-	
+
 	/** The sprite containing the "Press Any Key" message */
 	private Sprite pressAnyKey;
 	/** The sprite containing the "You win!" message */
 	private Sprite youWin;
 	/** The sprite containing the "You lose!" message */
 	private Sprite gotYou;
-	
+
 	/** The time since the last record of fps */
 	private long lastFpsTime = 0;
 	/** The recorded fps */
 	private int fps;
-	
+
 	/** The normal title of the window */
 	private String windowTitle = "Space Invaders 104 - Version (0.4)";
 
@@ -84,14 +83,14 @@ public class Game extends Canvas implements GameWindowCallback {
 	private boolean fire2HasBeenReleased = true;
 	private boolean pause = false;
 	private boolean vsync = true;
-	
-/*	private SoundManager sm;
+	private boolean pressEnter;
+	private Sprite bg;
+	private SoundManager sm;
 	private int sb1;
 	private int sb2;
-*/	private Sprite bg;
-private SoundManager sm;
-private int sb1;
-private int sb2;
+	private int bgm;
+	private String bgmref;
+	private String currentBgmref;
 
 	/**
 	 * Construct our game and set it running.
@@ -102,68 +101,88 @@ private int sb2;
 		// create a window based on a chosen rendering method
 		ResourceFactory.get().setRenderingType(renderingType);
 		setWindow(ResourceFactory.get().getGameWindow());
-		
+
 		getWindow().setResolution(width,height);
 		getWindow().setGameWindowCallback(this);
 		getWindow().setTitle(getWindowTitle());
-		
+
 		getWindow().startRendering();
 	}
-	
+
 	/**
 	 * Intialise the common elements for the game
 	 */
 	public void initialise() {
-		
+
 		gotYou = ResourceFactory.get().getSprite("sprites/gotyou.gif");
 		pressAnyKey = ResourceFactory.get().getSprite("sprites/pressanykey.gif");
 		youWin = ResourceFactory.get().getSprite("sprites/youwin.gif");
-		
+
 		message = pressAnyKey;
 
 		sm = new SoundManager();
-		sm.initialize(4);
+		sm.initialize(10);
 		sb1 = sm.addSound("sounds/sparo.wav");
 		sb2 = sm.addSound("sounds/Blaster-Solo.wav");
-		int bgm = sm.addSound("sounds/The Terminator (1984) Theme.wav");
-		sm.playSound(bgm);
 
 		startGame();
-	
+
 	}
-	
+
 	/**
 	 * Start a fresh game, this should clear out any old data and
 	 * create a new set.
 	 */
 	private void startGame() {
-		// clear out any existing entities and intialise a new set
+		// clear out any existing entities and initialize a new set
 		entities.clear();
 		initEntities();
+		if(!waitingForKeyPress){
+			if (bgmref != currentBgmref) {
+				currentBgmref = bgmref;
+				bgm = sm.addSound(bgmref);
+				sm.playSound(bgm);
+			}
+		}
 	}
-	
+
 	/**
 	 * Initialize the starting state of the entities (ship and aliens). Each
 	 * entity will be added to the overall list of entities in the game.
 	 */
 	private void initEntities() {
-		
+
 		// create the player ship and place it roughly in the center of the screen
 		ship = new ShipEntity(this,"sprites/ship.gif",0,0);
 		ship.x = width/2-ship.sprite.getWidth()/2;
 		ship.y = height-ship.sprite.getHeight()-5;
 		entities.add(ship);
 
-		// background setup
+		// setup level data
 		switch (level) {
 		case 1:
 			bg = ResourceFactory.get().getSprite("sprites/152.gif");
+			bgmref = "sounds/The Terminator (1984) Theme.wav";
 			break;
 		case 2:
+			bg = ResourceFactory.get().getSprite("sprites/152.gif");
+			bgmref = "sounds/The Terminator (1984) Theme.wav";
+			break;
+		case 3:
+			bg = ResourceFactory.get().getSprite("sprites/152.gif");
+			bgmref = "sounds/The Terminator (1984) Theme.wav";
+			break;
+		case 4:
+			bg = ResourceFactory.get().getSprite("sprites/152.gif");
+			bgmref = "sounds/The Terminator (1984) Theme.wav";
+			break;
+		case 5:
 			bg = ResourceFactory.get().getSprite("sprites/bg2.gif");
+			bgmref = "sounds/Filter & The Crystal Method - (Can't You) Trip Like I Do [Official Video] - DASH.WAV";
 			break;
 		default:
-			bg = ResourceFactory.get().getSprite("sprites/152.gif");
+			bg = ResourceFactory.get().getSprite("sprites/bg2.gif");
+			bgmref = "sounds/Filter & The Crystal Method - (Can't You) Trip Like I Do [Official Video] - DASH.WAV";
 			break;
 		}
 		// fill the screen
@@ -172,18 +191,18 @@ private int sb2;
 				backgroundEntities.add(new GlobalEntity(this, bg, bg.getWidth()*j, height - bg.getHeight()*i));
 		// arrange enemies
 		alienCount = 0;
-	    for (int x=0;x<10;x++){
+		for (int x=0;x<10;x++){
 			entities.add(new AlienEntity(this,100+(x*50),30));
 			alienCount++;
-		    for (int y=0;y<level;y++){			
+			for (int y=0;y<level;y++){			
 				Entity alieny = new AlienEntity(this,100+(x*50),(50*y)+30);
 				entities.add(alieny);
 				alienCount++;
 			}
 		}
-	    //backgroundEntities.add(new GlobalEntity(this, "sprites/brick.gif", 340, 50));
+		//backgroundEntities.add(new GlobalEntity(this, "sprites/brick.gif", 340, 50));
 	}
-	
+
 	/**
 	 * Notification from a game entity that the logic of the game
 	 * should be run at the next opportunity (normally as a result of some
@@ -192,7 +211,7 @@ private int sb2;
 	public void updateLogic() {
 		logicRequiredThisLoop = true;
 	}
-	
+
 	/**
 	 * Remove an entity from the game. The entity removed will
 	 * no longer move or be drawn.
@@ -209,7 +228,7 @@ private int sb2;
 		 */
 		first.setHealth(first.getHealth()-20);
 	}
-	
+
 	/**
 	 * Notification that the player has died. 
 	 */
@@ -217,7 +236,7 @@ private int sb2;
 		message = gotYou;
 		waitingForKeyPress = true;
 	}
-	
+
 	/**
 	 * Notification that the player has won since all the aliens
 	 * are dead.
@@ -225,32 +244,32 @@ private int sb2;
 	public void notifyWin() {
 		message = youWin;
 		level++;
-		waitingForKeyPress = true;
+		pressEnter = true;
 	}
-	
+
 	/**
 	 * Notification that an alien has been killed
 	 */
 	public void notifyAlienKilled() {
-		// reduce the alient count, if there are none left, the player has won!
+		// reduce the alien count, if there are none left, the player wins!
 		alienCount--;
-		
+
 		if (alienCount == 0) {
 			notifyWin();
 		}
-		
+
 		// if there are still some aliens left then they all need to get faster, so
 		// speed up all the existing aliens
 		for (int i=0;i<entities.size();i++) {
 			Entity entity = (Entity) entities.get(i);
-			
+
 			if (entity instanceof AlienEntity) {
 				// speed up by 2%
 				entity.setHorizontalMovement(entity.getHorizontalMovement() * 1.02);
 			}
 		}
 	}
-	
+
 	/**
 	 * Attempt to fire a shot from the player. Its called "try"
 	 * since we must first check that the player can fire at this 
@@ -261,13 +280,12 @@ private int sb2;
 		if (System.currentTimeMillis() - lastFire < firingInterval) {
 			return;
 		}
-		
+
 		// if we waited long enough, create the shot entity, and record the time.
 		lastFire = System.currentTimeMillis();
 		ShotEntity shot = new ShotEntity(this,"sprites/shot.gif",ship.getX()+10,ship.getY()-30);
 		entities.add(shot);
-		//sparo.playAsSoundEffect(1.0f, 1.0f, false);
-		sm.playSound(sb1);
+		sm.playEffect(sb1);
 	}
 
 	public void tryToFire2() {
@@ -275,24 +293,24 @@ private int sb2;
 		if (System.currentTimeMillis() - lastFire < firingInterval) {
 			return;
 		}
-		
+
 		// if we waited long enough, create the shot entity, and record the time.
 		lastFire = System.currentTimeMillis();
 		ShotEntity shotL = new ShotEntity(this,"sprites/shot.gif",ship.getX()+2,ship.getY()-22);
 		entities.add(shotL);
 		ShotEntity shotR = new ShotEntity(this,"sprites/shot.gif",ship.getX()+18,ship.getY()-22);
 		entities.add(shotR);
-		sm.playSound(sb2);
+		sm.playEffect(sb2);
 
 	}
-	
+
 	/**
 	 * Notification that a frame is being rendered. Responsible for
 	 * running game logic and rendering the scene.
 	 */
 	public void frameRendering() {	
 		SystemTimer.sleep(lastLoopTime+10-SystemTimer.getTime());
-		
+
 		// work out how long its been since the last update, this
 		// will be used to calculate how far the entities should
 		// move this loop
@@ -300,26 +318,24 @@ private int sb2;
 		lastLoopTime = SystemTimer.getTime();
 		lastFpsTime += delta;
 		fps++;
-		
+
 		// update our FPS counter if a second has passed
 		if (lastFpsTime >= 1000) {
 			getWindow().setTitle(getWindowTitle()+" (FPS: "+fps+")");
 			lastFpsTime = 0;
 			fps = 0;
 		}
-		if (!waitingForKeyPress && !pause) {
+		if (!waitingForKeyPress && !pause && !pressEnter) {
 			// Entity moving
 			for (int i=0;i<entities.size();i++) {
-				Entity entity = (Entity) entities.get(i);		
+				Entity entity = (Entity) entities.get(i);	
 				entity.move(delta);
 			}
-			// Background moving
+			// Background moving/replace
 			for (int i=0;i<backgroundEntities.size();i++) {
 				GlobalEntity entity = (GlobalEntity) backgroundEntities.get(i);
-				if(entity.y >= height){
-					entity = new GlobalEntity(this, bg, entity.x, entity.y-((int)(height/bg.getHeight()+2)*bg.getHeight()));
-					backgroundEntities.set(i, entity);
-				}
+				if(entity.y >= height)
+					entity.y -= (int)(height/bg.getHeight()+2)*bg.getHeight();
 				entity.setVerticalMovement(120);
 				entity.move(delta);
 			}
@@ -331,10 +347,9 @@ private int sb2;
 		// cycle round drawing all the entities we have in the game
 		for (int i=0;i<entities.size();i++) {
 			Entity entity = (Entity) entities.get(i);
-			
 			entity.draw();
 		}
-		
+
 		// brute force collisions, compare every entity against
 		// every other entity. If any of them collide notify 
 		// both entities that the collision has occured
@@ -342,14 +357,14 @@ private int sb2;
 			for (int s=p+1;s<entities.size();s++) {
 				Entity me = (Entity) entities.get(p);
 				Entity him = (Entity) entities.get(s);
-				
+
 				if (me.collidesWith(him)) {
 					me.collidedWith(him);
 					him.collidedWith(me);
 				}
 			}
 		}
-		
+
 		// remove any entity that has been marked for clear up
 		entities.removeAll(removeList);
 		removeList.clear();
@@ -362,19 +377,19 @@ private int sb2;
 				Entity entity = (Entity) entities.get(i);
 				entity.doLogic();
 			}
-			
+
 			logicRequiredThisLoop = false;
 		}
-		
+
 		// if we're waiting for an "any key" press then draw the 
 		// current message 
 		if (waitingForKeyPress) {
 			message.draw(325,250);
 		}
 
-		// resolve the movemfent of the ship. First assume the ship 
+		// resolve the movement of the ship. First assume the ship 
 		// isn't moving. If either cursor key is pressed then
-		// update the movement appropraitely
+		// update the movement appropriately
 		ship.setHorizontalMovement(0);
 		ship.setVerticalMovement(0);
 
@@ -392,62 +407,70 @@ private int sb2;
 					vsync = !vsync;
 					Display.setVSyncEnabled(vsync);
 				}
-				else if (Keyboard.getEventKey() == Keyboard.KEY_P) {
+				else if (Keyboard.getEventKey() == Keyboard.KEY_P && !pressEnter && !waitingForKeyPress) {
 					pause = !pause;
+				}
+				else if (Keyboard.getEventKey() == Keyboard.KEY_RETURN) {
+					if (pressEnter) {
+						startGame();
+						pressEnter = false;
+					}
 				}
 			}
 		}
 		getWindow().renderText("Level: "+level, 370, 23);
-		if(pause) getWindow().renderText("Pause\nPress p to continue", 77, 33);
-		else{
-			boolean upPressed = getWindow().isKeyPressed(KeyEvent.VK_UP);
-			boolean downPressed = getWindow().isKeyPressed(KeyEvent.VK_DOWN);
-			boolean leftPressed = getWindow().isKeyPressed(KeyEvent.VK_LEFT);
-			boolean rightPressed = getWindow().isKeyPressed(KeyEvent.VK_RIGHT);
-			boolean firePressed = getWindow().isKeyPressed(KeyEvent.VK_SPACE) || getWindow().isLMousePressed(MouseEvent.BUTTON1);
-			boolean fire2Pressed = getWindow().isKeyPressed(KeyEvent.VK_SHIFT) || getWindow().isRMousePressed(MouseEvent.BUTTON1);
-			
-			if (!waitingForKeyPress) {
-				if ((upPressed) && (!downPressed)) {
-					ship.setVerticalMovement(-moveSpeed);
-				} else if ((downPressed) && (!upPressed)) {
-					ship.setVerticalMovement(moveSpeed);
+		if(!pressEnter){
+			if(pause) getWindow().renderText("Pause\nPress p to continue", 77, 33);
+			else{ 
+				boolean upPressed = getWindow().isKeyPressed(KeyEvent.VK_UP);
+				boolean downPressed = getWindow().isKeyPressed(KeyEvent.VK_DOWN);
+				boolean leftPressed = getWindow().isKeyPressed(KeyEvent.VK_LEFT);
+				boolean rightPressed = getWindow().isKeyPressed(KeyEvent.VK_RIGHT);
+				boolean firePressed = getWindow().isKeyPressed(KeyEvent.VK_SPACE) || getWindow().isLMousePressed(MouseEvent.BUTTON1);
+				boolean fire2Pressed = getWindow().isKeyPressed(KeyEvent.VK_SHIFT) || getWindow().isRMousePressed(MouseEvent.BUTTON1);
+
+				if (!waitingForKeyPress) {
+					if ((upPressed) && (!downPressed)) {
+						ship.setVerticalMovement(-moveSpeed);
+					} else if ((downPressed) && (!upPressed)) {
+						ship.setVerticalMovement(moveSpeed);
+					}
+					if ((leftPressed) && (!rightPressed)) {
+						ship.setHorizontalMovement(-moveSpeed);
+					} else if ((rightPressed) && (!leftPressed)) {
+						ship.setHorizontalMovement(moveSpeed);
+					}
+
+					if (!firePressed) {
+						fireHasBeenReleased = true;
+					}
+					if (!fire2Pressed) {
+						fire2HasBeenReleased = true;
+					}
+
+					// if we're pressing fire, attempt to fire
+					if (firePressed && fireHasBeenReleased) {
+						tryToFire();
+						fireHasBeenReleased = false;
+					}
+					if (fire2Pressed && fire2HasBeenReleased) {
+						tryToFire2();
+						fire2HasBeenReleased = false;
+					}
 				}
-				if ((leftPressed) && (!rightPressed)) {
-					ship.setHorizontalMovement(-moveSpeed);
-				} else if ((rightPressed) && (!leftPressed)) {
-					ship.setHorizontalMovement(moveSpeed);
-				}
-				
-				if (!firePressed) {
+				else if (!firePressed) {
 					fireHasBeenReleased = true;
 				}
-				if (!fire2Pressed) {
-					fire2HasBeenReleased = true;
-				}
-			
-				// if we're pressing fire, attempt to fire
-				if (firePressed && fireHasBeenReleased) {
-					tryToFire();
+				if ((firePressed) && (fireHasBeenReleased)) {
+					waitingForKeyPress = false;
 					fireHasBeenReleased = false;
+					startGame();
 				}
-				if (fire2Pressed && fire2HasBeenReleased) {
-					tryToFire2();
-					fire2HasBeenReleased = false;
-				}
-			}
-			else if (!firePressed) {
-				fireHasBeenReleased = true;
-			}
-			if ((firePressed) && (fireHasBeenReleased)) {
-				waitingForKeyPress = false;
-				fireHasBeenReleased = false;
-				startGame();
 			}
 		}
-		
 		// if escape has been pressed, stop the game
 		if (getWindow().isKeyPressed(KeyEvent.VK_ESCAPE)) {
+			sm.destroy();
 			System.exit(0);
 		}
 
@@ -460,7 +483,7 @@ private int sb2;
 		sm.destroy();
 		System.exit(0);
 	}
-	
+
 	/**
 	 * The entry point into the game. We'll simply create an
 	 * instance of class which will start the display and game
@@ -469,10 +492,10 @@ private int sb2;
 	 * @param argv The arguments that are passed into our game
 	 */
 	public static void main(String argv[]) {
-		
+
 		new Game(ResourceFactory.OPENGL_LWJGL);
-/*		int result = JOptionPane.showOptionDialog(null,"Java2D or OpenGL?","Java2D or OpenGL?",JOptionPane.YES_NO_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE,null,new String[] {"Java2D","JOGL","LWJGL"},null);
-		
+		/*		int result = JOptionPane.showOptionDialog(null,"Java2D or OpenGL?","Java2D or OpenGL?",JOptionPane.YES_NO_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE,null,new String[] {"Java2D","JOGL","LWJGL"},null);
+
 		if (result == 0) {
 			new Game(ResourceFactory.JAVA2D);
 		} else if (result == 1) {

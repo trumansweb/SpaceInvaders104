@@ -88,6 +88,7 @@ public class SoundManager {
 
       // link buffer and source, and play it
     	AL10.alSourcei(channel, AL10.AL_BUFFER, buffers[buffer]);
+    	AL10.alSourcef(channel, AL10.AL_GAIN, 0.5f);
     	AL10.alSourcePlay(channel);
     }
   }
@@ -98,11 +99,10 @@ public class SoundManager {
    */
   public void playSound(int buffer) {
     if(soundOutput) {
-      if(isPlayingSound()) playEffect(buffer);
-      else{
-    	AL10.alSourcei(sources[sources.length-1], AL10.AL_BUFFER, buffers[buffer]);
-        AL10.alSourcePlay(sources[sources.length-1]);
-      }
+      if(isPlayingSound()) AL10.alSourceStop(sources[sources.length-1]);
+      AL10.alSourcei(sources[sources.length-1], AL10.AL_BUFFER, buffers[buffer]);
+      AL10.alSourcei(sources[sources.length-1], AL10.AL_LOOPING, AL10.AL_TRUE);
+      AL10.alSourcePlay(sources[sources.length-1]);
     }
   }
 
@@ -186,7 +186,7 @@ public class SoundManager {
       scratchBuffer.put(buffers, 0, bufferIndex).flip();
       AL10.alDeleteBuffers(scratchBuffer);
 
-      // destory OpenAL
+      // destroy OpenAL
     	AL.destroy();
     }
   }

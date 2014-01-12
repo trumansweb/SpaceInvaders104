@@ -54,7 +54,7 @@ public class Game extends Canvas implements GameWindowCallback {
 	private boolean logicRequiredThisLoop = false;
 
 	/** The time at which the last rendering looped started from the point of view of the game logic */
-	private long lastLoopTime = SystemTimer.getTime();
+	private long lastLoopTime = System.currentTimeMillis();
 	/** The window that is being used to render the game */
 	private GameWindow window;
 	/** True if the fire key has been released */
@@ -77,8 +77,8 @@ public class Game extends Canvas implements GameWindowCallback {
 
 	/** The screen size */
 	GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-	private int width = 800;//gd.getDisplayMode().getWidth();
-	private int height = 600;//gd.getDisplayMode().getHeight();
+	private int width = 1280;//gd.getDisplayMode().getWidth();
+	private int height = 720;//gd.getDisplayMode().getHeight();
 	private int level = 1;
 	private boolean fire2HasBeenReleased = true;
 	private boolean pause = false;
@@ -101,11 +101,11 @@ public class Game extends Canvas implements GameWindowCallback {
 		// create a window based on a chosen rendering method
 		ResourceFactory.get().setRenderingType(renderingType);
 		setWindow(ResourceFactory.get().getGameWindow());
-
+		System.out.println(width);
 		getWindow().setResolution(width,height);
 		getWindow().setGameWindowCallback(this);
 		getWindow().setTitle(getWindowTitle());
-
+		
 		getWindow().startRendering();
 	}
 
@@ -117,7 +117,7 @@ public class Game extends Canvas implements GameWindowCallback {
 		gotYou = ResourceFactory.get().getSprite("sprites/gotyou.gif");
 		pressAnyKey = ResourceFactory.get().getSprite("sprites/pressanykey.gif");
 		youWin = ResourceFactory.get().getSprite("sprites/youwin.gif");
-
+		ResourceFactory.get().getGameWindow().setResolution(1280, 720);
 		message = pressAnyKey;
 
 		sm = new SoundManager();
@@ -309,16 +309,18 @@ public class Game extends Canvas implements GameWindowCallback {
 	 * running game logic and rendering the scene.
 	 */
 	public void frameRendering() {	
-		SystemTimer.sleep(lastLoopTime+10-SystemTimer.getTime());
+/*		SystemTimer.sleep(lastLoopTime+10-SystemTimer.getTime());
 
 		// work out how long its been since the last update, this
 		// will be used to calculate how far the entities should
 		// move this loop
 		long delta = SystemTimer.getTime() - lastLoopTime;
-		lastLoopTime = SystemTimer.getTime();
+		lastLoopTime = SystemTimer.getTime();*/
+		long delta = System.currentTimeMillis() - lastLoopTime;
+		lastLoopTime = System.currentTimeMillis();
 		lastFpsTime += delta;
 		fps++;
-
+		try { getClass().wait(1000); } catch (Exception e) {}
 		// update our FPS counter if a second has passed
 		if (lastFpsTime >= 1000) {
 			getWindow().setTitle(getWindowTitle()+" (FPS: "+fps+")");
@@ -401,7 +403,7 @@ public class Game extends Canvas implements GameWindowCallback {
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
 				if (Keyboard.getEventKey() == Keyboard.KEY_F) {
-					getWindow().setDisplayMode(!Display.isFullscreen());
+					//getWindow().setDisplayMode(!Display.isFullscreen());
 				}
 				else if (Keyboard.getEventKey() == Keyboard.KEY_V) {
 					vsync = !vsync;
@@ -480,7 +482,7 @@ public class Game extends Canvas implements GameWindowCallback {
 	 * Notifcation that the game window has been closed
 	 */
 	public void windowClosed() {
-		sm.destroy();
+		Display.destroy();
 		System.exit(0);
 	}
 

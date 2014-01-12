@@ -16,11 +16,6 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="E:/java/git/trumansweb/SpaceInvaders104"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="jar/timer.jar">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="E:/java/git/trumansweb/SpaceInvaders104"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="C:/Programme/Java/jre7/lib/jfxrt.jar"/>
 	<classpathentry kind="output" path="bin"/>

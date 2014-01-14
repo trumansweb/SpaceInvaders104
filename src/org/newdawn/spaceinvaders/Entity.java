@@ -28,10 +28,6 @@ public abstract class Entity {
 	protected double dx;
 	/** The current speed of this entity vertically (pixels/sec) */
 	protected double dy;
-	/** The rectangle used for this entity during collisions  resolution */
-	private Rectangle me = new Rectangle();
-	/** The rectangle used for other entities during collision resolution */
-	private Rectangle him = new Rectangle();
 	private int health = 100;
 	
 	/**
@@ -141,23 +137,11 @@ public abstract class Entity {
 	}
 	
 	/**
-	 * Check if this entity collised with another.
-	 * 
-	 * @param other The other entity to check collision against
-	 * @return True if the entities collide with each other
-	 */
-	public boolean collidesWith(Entity other) {
-		me.setBounds((int) x,(int) y,getSprite().getWidth(),getSprite().getHeight());
-		him.setBounds((int) other.x,(int) other.y,other.getSprite().getWidth(),other.getSprite().getHeight());
-
-		return me.intersects(him);
-	}
-	
-	/**
 	 * Notification that this entity collided with another.
+	 * @param d 
 	 * @param other The entity with which this entity collided.
 	 */
-	public abstract void collidedWith(Entity other);
+	public abstract void collidedWith(CollisionDetection d, Entity other);
 
 	public int getHealth() {
 		return health ;

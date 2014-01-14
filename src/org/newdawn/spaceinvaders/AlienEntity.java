@@ -1,5 +1,7 @@
 package org.newdawn.spaceinvaders;
 
+import org.truman.spaceinvaders.CollisionDetection;
+
 /**
  * An entity which represents one of our space invader aliens.
  * 
@@ -104,8 +106,8 @@ public class AlienEntity extends Entity {
 	 * 
 	 * @param other The other entity
 	 */
-	public void collidedWith(Entity other) {
-		
+	public void collidedWith(CollisionDetection d, Entity other) {
+	
 		if(used) return;
 		
 		if (other instanceof ShotEntity) {

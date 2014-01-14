@@ -153,12 +153,6 @@ public class Game extends Canvas implements GameWindowCallback {
 	 */
 	private void initEntities() {
 
-		// create the player ship and place it roughly in the center of the screen
-		ship = new ShipEntity(this,"sprites/ship.gif",0,0);
-		ship.x = width/2-ship.getSprite().getWidth()/2;
-		ship.y = height-ship.getSprite().getHeight()-5;
-		entities.add(ship);
-
 		// setup level data
 		switch (level) {
 		case 1:
@@ -190,9 +184,13 @@ public class Game extends Canvas implements GameWindowCallback {
 		for (int i = 1; i <= (int)(height/bg.getHeight()+2); i++)
 			for (int j = 0; j < (int)(width/bg.getWidth()+1); j++)
 				backgroundEntities.add(new GlobalEntity(this, bg, bg.getWidth()*j, height - bg.getHeight()*i));
+		// bricks, walls...
+		GlobalEntity b = new GlobalEntity(this, "sprites/brick.gif", 340, 50);
+		b.setVerticalMovement(30);
+		entities.add(b);
 		// arrange enemies
-		alienCount = 8;
-		/*for (int x=0;x<10;x++){
+		alienCount = 0;
+		for (int x=0;x<10;x++){
 			entities.add(new AlienEntity(this,100+(x*50),30));
 			alienCount++;
 			for (int y=0;y<level;y++){			
@@ -200,8 +198,13 @@ public class Game extends Canvas implements GameWindowCallback {
 				entities.add(alieny);
 				alienCount++;
 			}
-		}*/
-		entities.add(new GlobalEntity(this, "sprites/brick.gif", 340, 50));
+		}
+
+		// create the player ship and place it roughly in the center of the screen
+		ship = new ShipEntity(this,"sprites/ship.gif",0,0);
+		ship.x = width/2-ship.getSprite().getWidth()/2;
+		ship.y = height-ship.getSprite().getHeight()-5;
+		entities.add(ship);
 	}
 
 	/**
@@ -345,9 +348,10 @@ public class Game extends Canvas implements GameWindowCallback {
 			for (int s=p+1;s<entities.size();s++) {
 				Entity me = (Entity) entities.get(p);
 				Entity him = (Entity) entities.get(s);
-				if (me.collidesWith(him)) {
-					me.collidedWith(him);
-					him.collidedWith(me);
+				CollisionDetection d = new CollisionDetection(me);
+				if (d.collidesWith(him)) {
+					me.collidedWith(d, him);
+					him.collidedWith(d, me);
 				}
 			}
 		}
@@ -394,6 +398,8 @@ public class Game extends Canvas implements GameWindowCallback {
 			entity.draw();
 		}
 
+		getWindow().renderText("Level: "+level, 370, 23);
+		if(pause) getWindow().renderText("Pause\nPress p to continue", 77, 33);
 		// if we're waiting for an "any key" press then draw the 
 		// current message 
 		if (waitingForKeyPress) {
@@ -425,10 +431,8 @@ public class Game extends Canvas implements GameWindowCallback {
 				}
 			}
 		}
-		getWindow().renderText("Level: "+level, 370, 23);
 		if(!pressEnter){
-			if(pause) getWindow().renderText("Pause\nPress p to continue", 77, 33);
-			else{ 
+			if(!pause){ 
 				boolean upPressed = getWindow().isKeyPressed(KeyEvent.VK_UP) && !isBlockedKey(KeyEvent.VK_UP);
 				boolean downPressed = getWindow().isKeyPressed(KeyEvent.VK_DOWN) && !isBlockedKey(KeyEvent.VK_DOWN);
 				boolean leftPressed = getWindow().isKeyPressed(KeyEvent.VK_LEFT) && !isBlockedKey(KeyEvent.VK_LEFT);

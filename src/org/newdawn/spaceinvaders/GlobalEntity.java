@@ -46,7 +46,7 @@ public class GlobalEntity extends Entity{
 	 * 
 	 * @param other The entity with which this entity has collided
 	 */
-	public void collidedWith(Entity other) {
+	public void collidedWith(CollisionDetection d, Entity other) {
 		if(other instanceof ShipEntity){
 		}
 	}

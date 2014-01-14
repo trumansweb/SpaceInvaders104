@@ -58,14 +58,13 @@ public class ShipEntity extends Entity {
 	 * 
 	 * @param other The entity with which the ship has collided
 	 */
-	public void collidedWith(Entity other) {
+	public void collidedWith(CollisionDetection d, Entity other) {
 		// if its an alien, notify the game that the player
 		// is dead
 		if (other instanceof AlienEntity) {
 			game.notifyDeath();
 		}
 		if (other instanceof GlobalEntity) {
-			CollisionDetection d = new CollisionDetection(this.game, this, other);
 			if(d.collidedTop){
 				game.addBlockedKey(KeyEvent.VK_UP);
 				super.setVerticalMovement(super.getVerticalMovement()+other.getVerticalMovement());

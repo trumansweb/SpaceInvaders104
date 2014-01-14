@@ -1,5 +1,7 @@
 package org.newdawn.spaceinvaders;
 
+import org.truman.spaceinvaders.CollisionDetection;
+
 /**
  * An entity representing a shot fired by the player's ship
  * 
@@ -50,7 +52,7 @@ public class ShotEntity extends Entity {
 	 * 
 	 * @param other The other entity with which we've collided
 	 */
-	public void collidedWith(Entity other) {
+	public void collidedWith(CollisionDetection d, Entity other) {
 
 	}
 

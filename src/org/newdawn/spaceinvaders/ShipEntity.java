@@ -1,5 +1,9 @@
 package org.newdawn.spaceinvaders;
 
+import java.awt.event.KeyEvent;
+
+import org.truman.spaceinvaders.CollisionDetection;
+
 /**
  * The entity that represents the players ship
  * 
@@ -24,7 +28,7 @@ public class ShipEntity extends Entity {
 	}
 	
 	/**
-	 * Request that the ship move itself based on an elapsed ammount of
+	 * Request that the ship move itself based on an elapsed amount of
 	 * time
 	 * 
 	 * @param delta The time that has elapsed since last move (ms)
@@ -37,13 +41,13 @@ public class ShipEntity extends Entity {
 		}
 		// if we're moving right and have reached the right hand side
 		// of the screen, don't move
-		if ((dx > 0) && (x > game.getWidth()-super.sprite.getWidth()-10)) {
+		if ((dx > 0) && (x > game.getWidth()-super.getSprite().getWidth()-10)) {
 			return;
 		}
 		if ((dy < 0) && (y < 10)) {
 			return;
 		}
-		if ((dy > 0) && (y > game.getHeight()-super.sprite.getHeight()-10)) {
+		if ((dy > 0) && (y > game.getHeight()-super.getSprite().getHeight()-10)) {
 			return;
 		}		
 		super.move(delta);
@@ -60,5 +64,26 @@ public class ShipEntity extends Entity {
 		if (other instanceof AlienEntity) {
 			game.notifyDeath();
 		}
+		if (other instanceof GlobalEntity) {
+			CollisionDetection d = new CollisionDetection(this.game, this, other);
+			if(d.collidedTop){
+				game.addBlockedKey(KeyEvent.VK_UP);
+				super.setVerticalMovement(super.getVerticalMovement()+other.getVerticalMovement());
+			}
+			if(d.collidedLeft){
+				game.addBlockedKey(KeyEvent.VK_LEFT);
+			}
+			if(d.collidedBottom){
+				game.addBlockedKey(KeyEvent.VK_DOWN);
+			}
+			if(d.collidedRight){
+				game.addBlockedKey(KeyEvent.VK_RIGHT);
+			}
+		}
+	}
+	
+	public void doLogic(long delta) {
+
+	    
 	}
 }

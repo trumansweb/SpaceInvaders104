@@ -9,7 +9,8 @@ import java.util.ArrayList;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
-import org.truman.sound.SoundManager;
+import org.truman.spaceinvaders.CollisionDetection;
+import org.truman.spaceinvaders.SoundManager;
 
 /**
  * The main hook of our game. This class with both act as a manager
@@ -77,8 +78,8 @@ public class Game extends Canvas implements GameWindowCallback {
 
 	/** The screen size */
 	GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-	private int width = 1280;//gd.getDisplayMode().getWidth();
-	private int height = 720;//gd.getDisplayMode().getHeight();
+	private int width = 800;//gd.getDisplayMode().getWidth();
+	private int height = 600;//gd.getDisplayMode().getHeight();
 	private int level = 1;
 	private boolean fire2HasBeenReleased = true;
 	private boolean pause = false;
@@ -91,6 +92,7 @@ public class Game extends Canvas implements GameWindowCallback {
 	private int bgm;
 	private String bgmref;
 	private String currentBgmref;
+	private ArrayList<Integer> blockedKeys = new ArrayList<Integer>();
 
 	/**
 	 * Construct our game and set it running.
@@ -101,7 +103,6 @@ public class Game extends Canvas implements GameWindowCallback {
 		// create a window based on a chosen rendering method
 		ResourceFactory.get().setRenderingType(renderingType);
 		setWindow(ResourceFactory.get().getGameWindow());
-		System.out.println(width);
 		getWindow().setResolution(width,height);
 		getWindow().setGameWindowCallback(this);
 		getWindow().setTitle(getWindowTitle());
@@ -117,7 +118,7 @@ public class Game extends Canvas implements GameWindowCallback {
 		gotYou = ResourceFactory.get().getSprite("sprites/gotyou.gif");
 		pressAnyKey = ResourceFactory.get().getSprite("sprites/pressanykey.gif");
 		youWin = ResourceFactory.get().getSprite("sprites/youwin.gif");
-		ResourceFactory.get().getGameWindow().setResolution(1280, 720);
+
 		message = pressAnyKey;
 
 		sm = new SoundManager();
@@ -154,8 +155,8 @@ public class Game extends Canvas implements GameWindowCallback {
 
 		// create the player ship and place it roughly in the center of the screen
 		ship = new ShipEntity(this,"sprites/ship.gif",0,0);
-		ship.x = width/2-ship.sprite.getWidth()/2;
-		ship.y = height-ship.sprite.getHeight()-5;
+		ship.x = width/2-ship.getSprite().getWidth()/2;
+		ship.y = height-ship.getSprite().getHeight()-5;
 		entities.add(ship);
 
 		// setup level data
@@ -190,8 +191,8 @@ public class Game extends Canvas implements GameWindowCallback {
 			for (int j = 0; j < (int)(width/bg.getWidth()+1); j++)
 				backgroundEntities.add(new GlobalEntity(this, bg, bg.getWidth()*j, height - bg.getHeight()*i));
 		// arrange enemies
-		alienCount = 0;
-		for (int x=0;x<10;x++){
+		alienCount = 8;
+		/*for (int x=0;x<10;x++){
 			entities.add(new AlienEntity(this,100+(x*50),30));
 			alienCount++;
 			for (int y=0;y<level;y++){			
@@ -199,8 +200,8 @@ public class Game extends Canvas implements GameWindowCallback {
 				entities.add(alieny);
 				alienCount++;
 			}
-		}
-		//backgroundEntities.add(new GlobalEntity(this, "sprites/brick.gif", 340, 50));
+		}*/
+		entities.add(new GlobalEntity(this, "sprites/brick.gif", 340, 50));
 	}
 
 	/**
@@ -327,6 +328,47 @@ public class Game extends Canvas implements GameWindowCallback {
 			lastFpsTime = 0;
 			fps = 0;
 		}
+
+		// resolve the movement of the ship. First assume the ship 
+		// isn't moving. If either cursor key is pressed then
+		// update the movement appropriately
+		ship.setHorizontalMovement(0);
+		ship.setVerticalMovement(0);
+		
+		// make sure we don't have blocked keys 
+		blockedKeys.clear();
+		
+		// brute force collisions, compare every entity against
+		// every other entity. If any of them collide notify 
+		// both entities that the collision has occurred
+		for (int p=0;p<entities.size();p++) {
+			for (int s=p+1;s<entities.size();s++) {
+				Entity me = (Entity) entities.get(p);
+				Entity him = (Entity) entities.get(s);
+				if (me.collidesWith(him)) {
+					me.collidedWith(him);
+					him.collidedWith(me);
+				}
+			}
+		}
+
+		// remove any entity that has been marked for clear up
+		entities.removeAll(removeList);
+		removeList.clear();
+		keyhandling();
+
+		// if a game event has indicated that game logic should
+		// be resolved, cycle round every entity requesting that
+		// their personal logic should be considered.
+		if (logicRequiredThisLoop) {
+			for (int i=0;i<entities.size();i++) {
+				Entity entity = (Entity) entities.get(i);
+				entity.doLogic();
+			}
+
+			logicRequiredThisLoop = false;
+		}
+
 		if (!waitingForKeyPress && !pause && !pressEnter) {
 			// Entity moving
 			for (int i=0;i<entities.size();i++) {
@@ -342,45 +384,14 @@ public class Game extends Canvas implements GameWindowCallback {
 				entity.move(delta);
 			}
 		}
+		// cycle round drawing all the entities we have in the game
 		for (int i=0;i<backgroundEntities.size();i++) {
 			Entity entity = (Entity) backgroundEntities.get(i);
 			entity.draw();
 		}
-		// cycle round drawing all the entities we have in the game
 		for (int i=0;i<entities.size();i++) {
 			Entity entity = (Entity) entities.get(i);
 			entity.draw();
-		}
-
-		// brute force collisions, compare every entity against
-		// every other entity. If any of them collide notify 
-		// both entities that the collision has occured
-		for (int p=0;p<entities.size();p++) {
-			for (int s=p+1;s<entities.size();s++) {
-				Entity me = (Entity) entities.get(p);
-				Entity him = (Entity) entities.get(s);
-
-				if (me.collidesWith(him)) {
-					me.collidedWith(him);
-					him.collidedWith(me);
-				}
-			}
-		}
-
-		// remove any entity that has been marked for clear up
-		entities.removeAll(removeList);
-		removeList.clear();
-
-		// if a game event has indicated that game logic should
-		// be resolved, cycle round every entity requesting that
-		// their personal logic should be considered.
-		if (logicRequiredThisLoop) {
-			for (int i=0;i<entities.size();i++) {
-				Entity entity = (Entity) entities.get(i);
-				entity.doLogic();
-			}
-
-			logicRequiredThisLoop = false;
 		}
 
 		// if we're waiting for an "any key" press then draw the 
@@ -389,13 +400,7 @@ public class Game extends Canvas implements GameWindowCallback {
 			message.draw(325,250);
 		}
 
-		// resolve the movement of the ship. First assume the ship 
-		// isn't moving. If either cursor key is pressed then
-		// update the movement appropriately
-		ship.setHorizontalMovement(0);
-		ship.setVerticalMovement(0);
 
-		keyhandling();
 	}
 
 	private void keyhandling() {
@@ -424,10 +429,10 @@ public class Game extends Canvas implements GameWindowCallback {
 		if(!pressEnter){
 			if(pause) getWindow().renderText("Pause\nPress p to continue", 77, 33);
 			else{ 
-				boolean upPressed = getWindow().isKeyPressed(KeyEvent.VK_UP);
-				boolean downPressed = getWindow().isKeyPressed(KeyEvent.VK_DOWN);
-				boolean leftPressed = getWindow().isKeyPressed(KeyEvent.VK_LEFT);
-				boolean rightPressed = getWindow().isKeyPressed(KeyEvent.VK_RIGHT);
+				boolean upPressed = getWindow().isKeyPressed(KeyEvent.VK_UP) && !isBlockedKey(KeyEvent.VK_UP);
+				boolean downPressed = getWindow().isKeyPressed(KeyEvent.VK_DOWN) && !isBlockedKey(KeyEvent.VK_DOWN);
+				boolean leftPressed = getWindow().isKeyPressed(KeyEvent.VK_LEFT) && !isBlockedKey(KeyEvent.VK_LEFT);
+				boolean rightPressed = getWindow().isKeyPressed(KeyEvent.VK_RIGHT) && !isBlockedKey(KeyEvent.VK_RIGHT);
 				boolean firePressed = getWindow().isKeyPressed(KeyEvent.VK_SPACE) || getWindow().isLMousePressed(MouseEvent.BUTTON1);
 				boolean fire2Pressed = getWindow().isKeyPressed(KeyEvent.VK_SHIFT) || getWindow().isRMousePressed(MouseEvent.BUTTON1);
 
@@ -472,7 +477,6 @@ public class Game extends Canvas implements GameWindowCallback {
 		}
 		// if escape has been pressed, stop the game
 		if (getWindow().isKeyPressed(KeyEvent.VK_ESCAPE)) {
-			sm.destroy();
 			System.exit(0);
 		}
 
@@ -482,7 +486,7 @@ public class Game extends Canvas implements GameWindowCallback {
 	 * Notifcation that the game window has been closed
 	 */
 	public void windowClosed() {
-		Display.destroy();
+		sm.destroy();
 		System.exit(0);
 	}
 
@@ -537,5 +541,13 @@ public class Game extends Canvas implements GameWindowCallback {
 
 	public void setHeight(int height) {
 		this.height = height;
+	}
+
+	public void addBlockedKey(int key) {
+		blockedKeys.add(key);
+	}
+
+	public boolean isBlockedKey(int key) {
+		return blockedKeys.contains(key);
 	}
 }

@@ -1,5 +1,7 @@
 package org.newdawn.spaceinvaders;
 
+import org.truman.spaceinvaders.CollisionDetection;
+
 public class GlobalEntity extends Entity{
 	/** The game in which the ship exists */
 	private Game game;
@@ -33,13 +35,20 @@ public class GlobalEntity extends Entity{
 	public void move(long delta) {
 		super.move(delta);
 	}
-
+	/**
+	 * Update the game logic related to aliens
+	 */
+	public void doLogic() {
+		
+	}
 	/**
 	 * Notification that the entity has collided with something
 	 * 
 	 * @param other The entity with which this entity has collided
 	 */
 	public void collidedWith(Entity other) {
+		if(other instanceof ShipEntity){
+		}
 	}
 
 	public Game getGame() {
@@ -49,4 +58,5 @@ public class GlobalEntity extends Entity{
 	public void setGame(Game game) {
 		this.game = game;
 	}
+
 }

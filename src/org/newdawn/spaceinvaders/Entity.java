@@ -2,6 +2,8 @@ package org.newdawn.spaceinvaders;
 
 import java.awt.Rectangle;
 
+import org.truman.spaceinvaders.CollisionDetection;
+
 /**
  * An entity represents any element that appears in the game. The
  * entity is responsible for resolving collisions and movement
@@ -21,7 +23,7 @@ public abstract class Entity {
 	/** The current y location of this entity */
 	protected double y;
 	/** The sprite that represents this entity */
-	protected Sprite sprite;
+	private Sprite sprite;
 	/** The current speed of this entity horizontally (pixels/sec) */
 	protected double dx;
 	/** The current speed of this entity vertically (pixels/sec) */
@@ -40,13 +42,13 @@ public abstract class Entity {
 	 * @param y The initial y location of this entity
 	 */
 	public Entity(String ref, double x, double y) {
-		this.sprite = ResourceFactory.get().getSprite(ref);
+		this.setSprite(ResourceFactory.get().getSprite(ref));
 		this.x = x;
 		this.y = y;
 	}
 	
 	public Entity(Sprite sprite, double x, double y) {
-		this.sprite = sprite;
+		this.setSprite(sprite);
 		this.x = x;
 		this.y = y;
 	}
@@ -103,7 +105,7 @@ public abstract class Entity {
 	 * Draw this entity to the graphics context provided
 	 */
 	public void draw() {
-		sprite.draw((int) x,(int) y);
+		getSprite().draw((int) x,(int) y);
 	}
 	
 	/**
@@ -120,6 +122,10 @@ public abstract class Entity {
 	 */
 	public int getX() {
 		return (int) x;
+	}
+
+	public double getXd() {
+		return x;
 	}
 
 	/**
@@ -141,15 +147,14 @@ public abstract class Entity {
 	 * @return True if the entities collide with each other
 	 */
 	public boolean collidesWith(Entity other) {
-		me.setBounds((int) x,(int) y,sprite.getWidth(),sprite.getHeight());
-		him.setBounds((int) other.x,(int) other.y,other.sprite.getWidth(),other.sprite.getHeight());
+		me.setBounds((int) x,(int) y,getSprite().getWidth(),getSprite().getHeight());
+		him.setBounds((int) other.x,(int) other.y,other.getSprite().getWidth(),other.getSprite().getHeight());
 
 		return me.intersects(him);
 	}
 	
 	/**
 	 * Notification that this entity collided with another.
-	 * 
 	 * @param other The entity with which this entity collided.
 	 */
 	public abstract void collidedWith(Entity other);
@@ -159,5 +164,13 @@ public abstract class Entity {
 	}
 
 	public void setHealth(int health) {
+	}
+
+	public Sprite getSprite() {
+		return sprite;
+	}
+
+	public void setSprite(Sprite sprite) {
+		this.sprite = sprite;
 	}
 }

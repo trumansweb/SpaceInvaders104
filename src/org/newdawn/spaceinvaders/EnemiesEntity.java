@@ -5,7 +5,7 @@ package org.newdawn.spaceinvaders;
  * 
  * @author Kevin Glass
  */
-public class AlienEntity extends Entity {
+public class EnemiesEntity extends Entity {
 	/** The speed at which the alient moves horizontally */
 	private double moveSpeed = 75;
 	/** The game in which the entity exists */
@@ -28,7 +28,7 @@ public class AlienEntity extends Entity {
 	 * @param x The intial x location of this alien
 	 * @param y The intial y location of this alient
 	 */
-	public AlienEntity(Game game,int x,int y) {
+	public EnemiesEntity(Game game,int x,int y) {
 		super("sprites/alien.gif",x,y);
 		
 		// setup the animatin frames
@@ -87,16 +87,7 @@ public class AlienEntity extends Entity {
 	 * Update the game logic related to aliens
 	 */
 	public void doLogic() {
-		// swap over horizontal movement and move down the
-		// screen a bit
-		dx = -dx;
-		//y += 10;
-		
-		// if we've reached the bottom of the screen then
-		// put it on top
-		if (y > game.getHeight()) {
-			y = 0 - this.getSprite().getHeight();
-		}
+
 	}
 	
 	/**
